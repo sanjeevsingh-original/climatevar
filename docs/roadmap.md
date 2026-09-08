@@ -25,7 +25,7 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Moving-block bootstrap field significance
 - [x] Formal SPI/SPEI foundation
 - [ ] Benchmark all trend methods against trusted reference implementations
-- [ ] Add confidence intervals for Sen slopes and regional trends
+- [x] Add moving-block bootstrap confidence intervals for Sen slopes and regional trends
 - [ ] Add more explicit diagnostics for long-memory persistence
 
 ## Phase 3 — Publication-grade climate indices
