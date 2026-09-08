@@ -9,10 +9,8 @@ description = "A Python library for reproducible climate and atmospheric science
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [
-  { name = "Sanjeev Singh" }
-]
-keywords = ["climate", "climate-science", "atmospheric-science", "meteorology", "xarray", "extremes"]
+authors = [{ name = "Sanjeev Singh" }]
+keywords = ["climate", "climate-science", "atmospheric-science", "meteorology", "xarray", "extremes", "precipitation"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Science/Research",
@@ -21,23 +19,14 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Topic :: Scientific/Engineering :: Atmospheric Science",
 ]
-dependencies = [
-  "numpy>=1.24",
-  "xarray>=2024.1",
-]
+dependencies = ["numpy>=1.24", "xarray>=2024.1"]
 
 [project.optional-dependencies]
 stats = ["scipy>=1.10"]
 plot = ["matplotlib>=3.7"]
 all = ["scipy>=1.10", "matplotlib>=3.7"]
 test = ["pytest>=8.0", "pandas>=2.0"]
-
-dev = [
-  "pytest>=8.0",
-  "pandas>=2.0",
-  "scipy>=1.10",
-  "matplotlib>=3.7",
-]
+dev = ["pytest>=8.0", "pandas>=2.0", "scipy>=1.10", "matplotlib>=3.7"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/climatevar"]
