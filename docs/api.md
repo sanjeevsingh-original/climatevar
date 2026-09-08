@@ -163,7 +163,7 @@ slope = sens_slope(annual_rain)
 tfpw_series = trend_free_prewhitening(annual_rain)
 ```
 
-Classical MK assumes serial independence. The modified test accounts for serial correlation through an effective-sample-size variance correction; this is important for climate and hydrological series because positive autocorrelation can inflate apparent significance. citeturn0search0
+Classical MK assumes serial independence. The modified test accounts for serial correlation through an effective-sample-size variance correction; report the autocorrelation treatment explicitly in scientific analyses.
 
 ## Seasonal MK and Sen slope
 
@@ -173,13 +173,11 @@ For monsoon trend studies, calculate the seasonal series first and then apply an
 from climatevar.trends import seasonal_series, seasonal_mann_kendall, seasonal_sen_slope
 
 jja = seasonal_series(monthly_rain, "JJA")
-ism = seasonal_series(monthly_rain, "JJA")
-
 jja_mk = seasonal_mann_kendall(monthly_rain, "JJA")
 jja_slope = seasonal_sen_slope(monthly_rain, "JJA")
 ```
 
-`seasonal_series` uses complete climatological seasons. DJF is assigned to the year in which January and February occur, avoiding a December/January boundary ambiguity. Seasonal MK is preferred over pooling all monthly observations when seasonality is intrinsic to the variable. citeturn0search11
+`seasonal_series` is intended for monthly seasonal totals, such as monthly precipitation. DJF is assigned to the year in which January and February occur, avoiding a December/January boundary ambiguity.
 
 > **Important:** `seasonal_series` currently aggregates the selected season by summation. For temperature or other state variables, first construct the appropriate seasonal mean series with `seasonal_mean`, then apply `modified_mann_kendall` or `sens_slope` to that series.
 
@@ -200,9 +198,66 @@ trend["significant"]
 trend["significant_fdr"]
 ```
 
-`spatial_trend` returns the trend statistic, Kendall tau, autocorrelation-aware p-value, effective sample size, Sen slope, uncorrected significance and Benjamini-Hochberg FDR significance. Multiple testing should be considered when interpreting grid-cell significance fields rather than treating every uncorrected `p < 0.05` cell as an independent discovery. citeturn0search13
+`spatial_trend` returns grid-cell trend statistics, autocorrelation-aware p-values, Sen slopes, uncorrected significance and Benjamini-Hochberg FDR significance. FDR controls the expected proportion of false discoveries among the rejected local tests; it does not establish that the field as a whole contains a significant trend.
 
-For a different family of tests, use `fdr_mask` directly:
+## Regional trend
+
+For a physically interpretable regional result, first reduce the grid to an area-weighted regional series and then test that series:
+
+```python
+from climatevar.trends import regional_mean, regional_trend
+
+region_series = regional_mean(
+    annual_rain,
+    lat_dim="latitude",
+    lon_dim="longitude",
+)
+region = regional_trend(
+    annual_rain,
+    lat_dim="latitude",
+    lon_dim="longitude",
+    alpha=0.05,
+)
+```
+
+Cosine-latitude weighting is used by default for regular latitude/longitude grids. For exact cell areas, supply a two-dimensional `weights` DataArray. Regional trend results should be reported separately from grid-cell significance because spatial averaging answers a different scientific question.
+
+## Field significance beyond FDR
+
+`field_significance` provides a Monte-Carlo field-wide test based on moving-block resampling of detrended residual fields. The same time indices are applied to every grid cell, preserving the spatial covariance structure while the block length retains short-range temporal dependence. The observed number of locally significant cells is compared with its null distribution.
+
+```python
+from climatevar.trends import field_significance
+
+field = field_significance(
+    annual_rain,
+    dim="time",
+    alpha=0.05,
+    block_length=5,
+    n_resamples=1000,
+    random_state=42,
+)
+
+field["observed_count"]
+field["critical_count"]
+field["field_pvalue"]
+field["significant_fdr"]
+```
+
+Interpretation:
+
+- `significant` is the uncorrected local MK mask.
+- `significant_fdr` is the Benjamini-Hochberg local FDR mask.
+- `observed_count` is the number of locally significant cells at the chosen `alpha`.
+- `critical_count` is the upper-tail bootstrap threshold for that count.
+- `field_pvalue` is the Monte-Carlo probability of obtaining at least the observed count under the block-resampled, detrended null.
+- `null_counts` contains the complete bootstrap distribution and should be retained for reproducibility.
+
+This field-wide test is complementary to FDR, not a replacement for it. The bootstrap count uses classical MK on the null residual fields, while the reported observed local p-values use climatevar's modified MK. For publication, report the block length, number of resamples, random seed, completeness rule and local-test method.
+
+For computationally demanding regional studies, start with a few hundred resamples for development and use a larger, documented ensemble for the final analysis.
+
+For a different family of local tests, use `fdr_mask` directly:
 
 ```python
 from climatevar.trends import fdr_mask
@@ -290,8 +345,7 @@ import xarray as xr
 from climatevar.io.normalize import normalize_dataset
 from climatevar.precipitation import daily_amount, PRCPTOT, Rx1day
 from climatevar.seasonal import monsoon_total
-from climatevar.drought import spi
-from climatevar.trends import seasonal_mann_kendall, seasonal_sen_slope, spatial_trend
+from climatevar.trends import modified_mann_kendall, sens_slope, spatial_trend
 
 raw = xr.open_dataset("era5.nc")
 ds = normalize_dataset(raw, dataset="era5")
@@ -302,8 +356,8 @@ prcptot = PRCPTOT(daily)
 ism = monsoon_total(daily)
 
 # Annual monsoon trend
-ism_mk = seasonal_mann_kendall(daily, "JJA")
-ism_slope = seasonal_sen_slope(daily, "JJA")
+ism_mk = modified_mann_kendall(ism)
+ism_slope = sens_slope(ism)
 
 # Grid-cell trend + FDR correction
 field = spatial_trend(ism)
@@ -311,4 +365,4 @@ field = spatial_trend(ism)
 
 ## Research reproducibility checklist
 
-For publication-quality work, report dataset/version, domain, temporal aggregation, units, calendar, completeness rule, SPI/SPEI distribution and calibration period, PET method for SPEI, percentile baseline, event thresholds, spatial weighting, trend method, autocorrelation treatment, significance level, and multiple-testing correction.
+For publication-quality work, report dataset/version, domain, temporal aggregation, units, calendar, completeness rule, SPI/SPEI distribution and calibration period, PET method for SPEI, percentile baseline, event thresholds, spatial weighting, trend method, autocorrelation treatment, significance level, multiple-testing correction, and field-significance resampling design when used.
