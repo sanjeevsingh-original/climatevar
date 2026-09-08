@@ -1,4 +1,4 @@
-"""Precipitation indices and hydroclimate diagnostics."""
+"""Precipitation normalization, indices, and hydroclimate diagnostics."""
 
 from .indices import (
     cdd,
@@ -11,10 +11,14 @@ from .indices import (
     rx1day,
     rx5day,
 )
+from .normalize import daily_amount, interval_amount_mm, normalize_precipitation
 
 __all__ = [
     "cdd",
     "cwd",
+    "daily_amount",
+    "interval_amount_mm",
+    "normalize_precipitation",
     "prcptot",
     "r10mm",
     "r20mm",
