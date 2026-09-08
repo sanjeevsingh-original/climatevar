@@ -10,6 +10,8 @@ nav:
       - Dataset interoperability: interoperability.md
       - API cookbook: api.md
       - Trend analysis: trends.md
+  - Project:
+      - Scientific roadmap: roadmap.md
 
 markdown_extensions:
   - admonition
