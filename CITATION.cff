@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use climatevar in research, please cite this software repository."
+title: "climatevar: A Python library for reproducible climate and atmospheric science analysis"
+type: software
+version: 0.1.0-dev0
+authors:
+  - family-names: Singh
+    given-names: Sanjeev
+    affiliation: "Researcher"
+repository-code: "https://github.com/sanjeevsingh-original/climatevar"
+license: MIT
+date-released: 2026-09-08
