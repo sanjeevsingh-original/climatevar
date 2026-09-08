@@ -1,6 +1,6 @@
 # Robust trend analysis
 
-`climatevar` provides classical Mann-Kendall (MK), Sen's slope, an autocorrelation-aware modified MK, trend-free pre-whitening (TFPW), calendar-aware seasonal trends, spatial FDR, regional trends, and a block-bootstrap field-significance diagnostic.
+`climatevar` provides classical Mann-Kendall (MK), Sen's slope, an autocorrelation-aware modified MK, trend-free pre-whitening (TFPW), calendar-aware seasonal trends, spatial FDR, regional trends, moving-block confidence intervals for Sen slopes, and a block-bootstrap field-significance diagnostic.
 
 ## Seasonal aggregation and completeness
 
@@ -51,6 +51,33 @@ mk_pw = mann_kendall(prewhitened)
 
 TFPW removes the estimated monotonic component, estimates lag-1 persistence, removes the AR(1) component, and restores the trend component. Report the exact pre-whitening method because variants can produce different significance estimates.
 
+## Sen slope confidence intervals
+
+```python
+from climatevar.trends import sens_slope_ci
+ci = sens_slope_ci(annual_rain, alpha=0.05, n_resamples=2000, block_length=5, random_state=42)
+```
+
+`sens_slope_ci` reports the Sen slope together with percentile confidence limits from a moving-block bootstrap. Block resampling is preferred to an IID bootstrap when observations are serially dependent because it retains local dependence within blocks. The default block length is data-length dependent; for publication, explicitly report the selected block length and sensitivity-test it. The slope remains expressed per observation step, so convert it to physical units such as mm/year only when the observation interval is known and regular.
+
+For an area-weighted regional series:
+
+```python
+from climatevar.trends import regional_slope_ci
+regional_ci = regional_slope_ci(
+    annual_rain,
+    lat_dim="latitude",
+    lon_dim="longitude",
+    n_resamples=2000,
+    block_length=5,
+    random_state=42,
+)
+```
+
+The regional field is first reduced to one area-weighted time series and the bootstrap is then performed on that series. This avoids treating grid cells as independent bootstrap observations.
+
+Confidence intervals quantify uncertainty under the selected resampling model; they do not replace the separate autocorrelation-aware trend-significance test.
+
 ## Spatial trend fields and FDR
 
 ```python
@@ -88,7 +115,8 @@ This performs a moving-block bootstrap on detrended residual fields. A common se
 3. Construct the seasonal series with an explicit `aggregation` and completeness threshold.
 4. Report Sen slope and classical MK as a baseline.
 5. Diagnose serial dependence and use modified MK or TFPW when justified.
-6. For spatial fields, report local p-values together with FDR results.
-7. If making a field-wide claim, add a documented block-bootstrap field-significance test.
-8. For regional claims, report the area-weighted regional series and its trend separately.
-9. Report slope magnitude, units, sample period and uncertainty/significance—not p-value alone.
+6. Report a bootstrap confidence interval for the Sen slope, with the block-length rationale.
+7. For spatial fields, report local p-values together with FDR results.
+8. If making a field-wide claim, add a documented block-bootstrap field-significance test.
+9. For regional claims, report the area-weighted regional series, trend and confidence interval separately.
+10. Report slope magnitude, units, sample period and uncertainty/significance—not p-value alone.
