@@ -12,6 +12,7 @@ from .indices import (
     rx5day,
 )
 from .normalize import daily_amount, interval_amount_mm, normalize_precipitation
+from .wrf import wrf_precipitation_amount, wrf_total_precipitation
 
 __all__ = [
     "cdd",
@@ -26,4 +27,6 @@ __all__ = [
     "r99p",
     "rx1day",
     "rx5day",
+    "wrf_precipitation_amount",
+    "wrf_total_precipitation",
 ]
