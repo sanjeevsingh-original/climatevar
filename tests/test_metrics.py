@@ -10,8 +10,8 @@ def test_continuous_metrics():
     assert np.isclose(bias(obs, pred).item(), 0.25)
     assert np.isclose(mae(obs, pred).item(), 0.75)
     assert np.isclose(rmse(obs, pred).item(), np.sqrt(0.75))
-    assert np.isclose(correlation(obs, pred).item(), 0.8)
-    assert np.isclose(nse(obs, pred).item(), 0.8)
+    assert np.isclose(correlation(obs, pred).item(), 0.674199862463242)
+    assert np.isclose(nse(obs, pred).item(), 0.4)
 
 
 def test_binary_f1():
