@@ -1,14 +1,16 @@
-"""Input/output helpers for common climate datasets."""
+"""Input/output and interoperability helpers for common climate datasets."""
 from .dataset import open_dataset
-from .grid import normalize_latitude, normalize_longitude
 from .normalize import find_variable, normalize_coords, normalize_dataset, standardize_variables
 from .schema import SCHEMA, ClimateSchema, describe_dataset, validate_dataset
 from .temporal import accumulated_to_increment, resample_precipitation, sort_and_validate_time
-from .units import precipitation_to_mm, temperature_to_celsius
+from ..grid import normalize_longitude, regrid
+from ..time import calendar_name, infer_frequency, time_step_seconds, validate_time
+from ..units import SI_UNITS, convert_units, normalize_units, to_si
 
 __all__ = [
-    "SCHEMA", "ClimateSchema", "accumulated_to_increment", "describe_dataset",
-    "find_variable", "normalize_coords", "normalize_dataset", "normalize_latitude",
-    "normalize_longitude", "open_dataset", "precipitation_to_mm", "resample_precipitation",
-    "sort_and_validate_time", "standardize_variables", "temperature_to_celsius", "validate_dataset",
+    "SCHEMA", "ClimateSchema", "SI_UNITS", "accumulated_to_increment", "calendar_name",
+    "convert_units", "describe_dataset", "find_variable", "infer_frequency", "normalize_coords",
+    "normalize_dataset", "normalize_longitude", "normalize_units", "open_dataset", "regrid",
+    "resample_precipitation", "sort_and_validate_time", "standardize_variables", "time_step_seconds",
+    "to_si", "validate_dataset", "validate_time",
 ]
