@@ -1,0 +1,15 @@
+site_name: climatevar
+site_description: Research-oriented climate and atmospheric science analysis in Python
+site_url: https://sanjeevsingh-original.github.io/climatevar/
+repo_url: https://github.com/sanjeevsingh-original/climatevar
+
+nav:
+  - Home: index.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+plugins:
+  - search
