@@ -9,6 +9,7 @@ nav:
       - Common data model: datasets.md
       - Dataset interoperability: interoperability.md
       - API cookbook: api.md
+      - Trend analysis: trends.md
 
 markdown_extensions:
   - admonition
