@@ -2,6 +2,7 @@
 from __future__ import annotations
 from collections.abc import Mapping
 import xarray as xr
+from ..units import normalize_units
 
 CANONICAL_COORDS = {"latitude", "longitude", "time"}
 COORD_ALIASES = {
@@ -27,7 +28,7 @@ DATASET_PRESETS = {
     "wrf": {"latitude": "XLAT", "longitude": "XLONG", "time": "Time", "precipitation": "RAINNC"},
     "imd": {"latitude": "lat", "longitude": "lon", "time": "time"},
     "imdaa": {"latitude": "latitude", "longitude": "longitude", "time": "time", "precipitation": "APCP_sfc", "temperature": "TMP_2m", "surface_pressure": "PRES_sfc", "relative_humidity": "RH_2m", "u_wind": "UGRD_10m", "v_wind": "VGRD_10m"},
-    "cmip6": {"latitude": "lat", "longitude": "lon", "time": "time"},
+    "cmip6": {"latitude": "lat", "longitude": "lon", "time": "time", "precipitation": "pr", "temperature": "tas"},
 }
 
 def _find_name(names, aliases):
@@ -94,9 +95,10 @@ def standardize_variables(ds: xr.Dataset, *, variables: Mapping[str, str] | None
     out.attrs["climatevar:normalization"] = history
     return out
 
-def normalize_dataset(ds: xr.Dataset, *, dataset: str | None = None, variables: Mapping[str, str] | None = None, strict: bool = True) -> xr.Dataset:
-    """Normalize coordinates and common variables in one auditable operation."""
-    return standardize_variables(normalize_coords(ds, dataset=dataset, strict=strict), variables=variables, dataset=dataset)
+def normalize_dataset(ds: xr.Dataset, *, dataset: str | None = None, variables: Mapping[str, str] | None = None, strict: bool = True, si: bool = True) -> xr.Dataset:
+    """Normalize coordinates/variables and, by default, convert recognized fields to SI."""
+    out = standardize_variables(normalize_coords(ds, dataset=dataset, strict=strict), variables=variables, dataset=dataset)
+    return normalize_units(out) if si else out
 
 def find_variable(ds: xr.Dataset, standard_name: str) -> str | None:
     """Return the matching source variable for a canonical physical quantity."""
