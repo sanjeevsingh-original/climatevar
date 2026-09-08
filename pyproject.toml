@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "climatevar"
+version = "0.1.0.dev0"
+description = "A Python library for reproducible climate and atmospheric science analysis."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Sanjeev Singh" }
+]
+keywords = ["climate", "climate-science", "atmospheric-science", "meteorology", "xarray", "extremes"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+dependencies = [
+  "numpy>=1.24",
+  "xarray>=2024.1",
+]
+
+[project.optional-dependencies]
+stats = ["scipy>=1.10"]
+plot = ["matplotlib>=3.7"]
+all = ["scipy>=1.10", "matplotlib>=3.7"]
+test = ["pytest>=8.0"]
+
+dev = [
+  "pytest>=8.0",
+  "scipy>=1.10",
+  "matplotlib>=3.7",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/climatevar"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
