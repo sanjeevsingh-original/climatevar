@@ -27,6 +27,18 @@ def test_normalize_to_si_units():
     np.testing.assert_allclose(out["surface_pressure"], [100000, 100500, 101000])
 
 
+def test_precipitation_flux_becomes_si_flux_not_amount():
+    time = pd.date_range("2000-01-01", periods=2, freq="D")
+    ds = xr.Dataset(
+        {"pr": xr.DataArray([86.4, 172.8], dims="time", attrs={"units": "mm/day"})},
+        coords={"time": time, "lat": 20.0, "lon": 85.0},
+    )
+    out = normalize_dataset(ds, dataset="cmip6")
+    assert out["precipitation"].attrs["units"] == "kg m-2 s-1"
+    assert out["precipitation"].attrs["climatevar:quantity"] == "precipitation_flux"
+    np.testing.assert_allclose(out["precipitation"], [1e-3, 2e-3])
+
+
 def test_frequency_detection():
     time = pd.date_range("2000-01-01", periods=24, freq="h")
     data = xr.DataArray(np.ones(24), coords={"time": time}, dims="time")
