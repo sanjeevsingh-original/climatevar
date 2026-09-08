@@ -20,6 +20,8 @@ A research-oriented Python library for reproducible climate and atmospheric scie
 - R10mm / R20mm — heavy precipitation day counts
 - R95p / R99p — precipitation above percentile thresholds
 - CWD / CDD — consecutive wet/dry day diagnostics
+- **All precipitation amount indices explicitly use mm**
+- Daily precipitation indices reject rates/fluxes unless they have first been converted to daily amounts
 
 ### Trend analysis
 - Mann-Kendall statistic and Kendall tau
@@ -49,6 +51,7 @@ A research-oriented Python library for reproducible climate and atmospheric scie
 - WRF `Times` decoding foundation
 - Optional NetCDF/HDF5/GRIB dependencies
 - Normalization history stored in dataset metadata for auditability
+- Precipitation amounts normalized to **mm**; precipitation fluxes remain explicit fluxes
 
 ### Data and modelling utilities
 - Explicit xarray NetCDF loading helper
@@ -102,19 +105,21 @@ wrf = normalize_dataset(
 print(era5["latitude"], era5["longitude"], era5["precipitation"])
 ```
 
-**Important:** normalization handles naming and basic structural differences; it does not silently convert units, temporal rates/accumulations, calendars, missing-value conventions, or grids. Those transformations must remain explicit because they can change scientific results.
+`normalize_dataset(..., si=True)` is the default. Recognized precipitation **amounts are normalized to mm**, while precipitation rates/fluxes remain explicit `kg m-2 s-1` quantities. Rates are never silently treated as daily rainfall amounts.
 
-See [`docs/datasets.md`](docs/datasets.md) for dataset-specific guidance.
+See [`docs/datasets.md`](docs/datasets.md) and [`docs/interoperability.md`](docs/interoperability.md) for dataset-specific guidance.
 
 ## Example: precipitation indices
 
 ```python
 from climatevar.precipitation import rx1day, rx5day
 
-rain = era5["precipitation"]
-annual_rx1day = rx1day(rain)
-annual_rx5day = rx5day(rain)
+rain = era5["precipitation"]  # precipitation amount in mm
+annual_rx1day = rx1day(rain)  # mm
+annual_rx5day = rx5day(rain)  # mm
 ```
+
+Precipitation indices require explicit amount units. Inputs in `m`, `cm`, or `mm` are normalized to `mm`; inputs without units or with rate/flux units are rejected to prevent physically incorrect rainfall indices.
 
 ## Scientific scope
 
