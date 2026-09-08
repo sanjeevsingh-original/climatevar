@@ -1,11 +1,15 @@
-"""Explicit conversion of common climate variables to SI units."""
+"""Explicit conversion of common climate variables to analysis units."""
 from __future__ import annotations
 from typing import Any
 import xarray as xr
 
+# Precipitation amount is intentionally kept in millimetres because mm is the
+# standard depth unit used throughout rainfall/climate-extremes analysis.
+# Other physical quantities use SI units. Precipitation flux remains an SI
+# mass flux and is never silently converted to an amount without a time step.
 SI_UNITS = {
     "temperature": "K", "surface_pressure": "Pa", "pressure": "Pa",
-    "precipitation": "m", "precipitation_amount": "m", "precipitation_flux": "kg m-2 s-1",
+    "precipitation": "mm", "precipitation_amount": "mm", "precipitation_flux": "kg m-2 s-1",
     "relative_humidity": "1", "specific_humidity": "kg kg-1", "u_wind": "m s-1",
     "v_wind": "m s-1", "wind_speed": "m s-1", "geopotential": "m2 s-2",
     "geopotential_height": "m",
@@ -21,7 +25,7 @@ def _is_precip_flux(unit: str) -> bool:
 
 
 def convert_units(data: xr.DataArray, target: str, *, source_units: str | None = None) -> xr.DataArray:
-    """Convert a DataArray to an explicit SI unit without guessing dimensions."""
+    """Convert a DataArray to an explicit target unit without guessing dimensions."""
     src = _unit_text(source_units if source_units is not None else data.attrs.get("units"))
     if not src:
         raise ValueError(f"No source units supplied for {data.name!r}.")
@@ -44,9 +48,10 @@ def convert_units(data: xr.DataArray, target: str, *, source_units: str | None =
         if src in {"kg kg-1", "kg/kg", "1"}: values = out
         elif src in {"g kg-1", "g/kg"}: values = out * 1e-3
         else: raise ValueError(f"Cannot safely convert specific humidity from {source_units!r} to kg kg-1.")
-    elif target == "m":
-        factors = {"m": 1.0, "meter": 1.0, "metre": 1.0, "mm": 1e-3, "millimeter": 1e-3, "millimetre": 1e-3, "cm": 1e-2}
-        if src not in factors: raise ValueError("A precipitation rate cannot be converted to an amount without a time interval. Use precipitation_flux for rate data.")
+    elif target == "mm":
+        factors = {"mm": 1.0, "meter": 1000.0, "metre": 1000.0, "m": 1000.0, "cm": 10.0}
+        if src not in factors:
+            raise ValueError("A precipitation rate cannot be converted to an amount without a time interval. Use precipitation_flux for rate data.")
         values = out * factors[src]
     elif target == "kg m-2 s-1":
         if src in {"kg m-2 s-1", "kg/m2/s", "kg m-2 s^-1"}: values = out
@@ -68,35 +73,38 @@ def convert_units(data: xr.DataArray, target: str, *, source_units: str | None =
     result = xr.DataArray(values, coords=out.coords, dims=out.dims, name=out.name, attrs=dict(out.attrs))
     result.attrs["units"] = target
     result.attrs["climatevar:source_units"] = source_units if source_units is not None else data.attrs.get("units")
-    result.attrs["climatevar:unit_system"] = "SI"
+    result.attrs["climatevar:unit_system"] = "SI_except_precipitation_amount_mm"
     return result
 
 
 def to_si(data: xr.DataArray, quantity: str, *, source_units: str | None = None) -> xr.DataArray:
-    """Convert a canonical climate variable to its SI unit."""
+    """Convert a canonical climate variable to its project-standard unit."""
     if quantity not in SI_UNITS: raise KeyError(f"Unknown canonical quantity: {quantity!r}")
     return convert_units(data, SI_UNITS[quantity], source_units=source_units)
 
 
 def normalize_units(ds: xr.Dataset, *, variables: list[str] | None = None) -> xr.Dataset:
-    """Convert recognized canonical variables to SI units.
+    """Normalize recognized canonical variables.
 
-    For precipitation, amount units become metres. Rate units become
-    ``kg m-2 s-1`` and are tagged as a flux; no rate-to-amount conversion is
-    attempted without an explicit temporal integration step.
+    Precipitation amounts are always represented explicitly in ``mm``.
+    Precipitation rates/fluxes are represented as ``kg m-2 s-1`` and tagged
+    as fluxes; no rate-to-amount conversion is attempted without a temporal
+    integration step.
     """
     out = ds.copy()
     selected = variables or list(SI_UNITS)
     for name in selected:
-        if name not in out.data_vars or "units" not in out[name].attrs: continue
+        if name not in out.data_vars or "units" not in out[name].attrs:
+            continue
         if name == "precipitation" and _is_precip_flux(_unit_text(out[name].attrs["units"])):
             out[name] = convert_units(out[name], "kg m-2 s-1")
             out[name].attrs["climatevar:quantity"] = "precipitation_flux"
         else:
             out[name] = to_si(out[name], name)
-            if name == "precipitation": out[name].attrs["climatevar:quantity"] = "precipitation_amount"
+            if name == "precipitation":
+                out[name].attrs["climatevar:quantity"] = "precipitation_amount"
     history = list(out.attrs.get("climatevar:normalization", []))
     if isinstance(history, str): history = [history]
-    history.append("normalize_units(target=SI)")
+    history.append("normalize_units(target=SI_except_precipitation_amount_mm)")
     out.attrs["climatevar:normalization"] = history
     return out
