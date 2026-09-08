@@ -12,22 +12,22 @@ def test_normalize_to_si_units():
     time = pd.date_range("2000-01-01", periods=3, freq="D")
     ds = xr.Dataset(
         {
-            "tp": xr.DataArray([1.0, 2.0, 3.0], dims="time", attrs={"units": "mm"}),
+            "tp": xr.DataArray([1.0, 2.0, 3.0], dims="time", attrs={"units": "m"}),
             "t2m": xr.DataArray([0.0, 10.0, 20.0], dims="time", attrs={"units": "degC"}),
             "sp": xr.DataArray([1000.0, 1005.0, 1010.0], dims="time", attrs={"units": "hPa"}),
         },
         coords={"time": time, "latitude": 20.0, "longitude": 85.0},
     )
     out = normalize_dataset(ds, dataset="era5")
-    assert out["precipitation"].attrs["units"] == "m"
+    assert out["precipitation"].attrs["units"] == "mm"
     assert out["temperature"].attrs["units"] == "K"
     assert out["surface_pressure"].attrs["units"] == "Pa"
-    np.testing.assert_allclose(out["precipitation"], [0.001, 0.002, 0.003])
+    np.testing.assert_allclose(out["precipitation"], [1000.0, 2000.0, 3000.0])
     np.testing.assert_allclose(out["temperature"], [273.15, 283.15, 293.15])
     np.testing.assert_allclose(out["surface_pressure"], [100000, 100500, 101000])
 
 
-def test_precipitation_flux_becomes_si_flux_not_amount():
+def test_precipitation_flux_stays_si_flux_not_amount():
     time = pd.date_range("2000-01-01", periods=2, freq="D")
     ds = xr.Dataset(
         {"pr": xr.DataArray([86.4, 172.8], dims="time", attrs={"units": "mm/day"})},
@@ -37,6 +37,13 @@ def test_precipitation_flux_becomes_si_flux_not_amount():
     assert out["precipitation"].attrs["units"] == "kg m-2 s-1"
     assert out["precipitation"].attrs["climatevar:quantity"] == "precipitation_flux"
     np.testing.assert_allclose(out["precipitation"], [1e-3, 2e-3])
+
+
+def test_direct_precipitation_si_conversion_is_mm():
+    data = xr.DataArray([0.001, 0.002], attrs={"units": "m"})
+    out = to_si(data, "precipitation")
+    assert out.attrs["units"] == "mm"
+    np.testing.assert_allclose(out, [1.0, 2.0])
 
 
 def test_frequency_detection():
