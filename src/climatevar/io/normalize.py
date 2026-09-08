@@ -1,22 +1,19 @@
 """Normalize heterogeneous climate datasets to a small canonical schema.
 
 The same physical quantity is often stored under different names across ERA5,
-IMD, IMERG and WRF. This module makes those differences explicit while keeping
-an audit trail in dataset attributes. It does not guess ambiguous variables.
+IMD, IMDAA, IMERG and WRF. This module makes those differences explicit while
+keeping an audit trail in dataset attributes. It does not silently convert units.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-import re
-from typing import Any
 
 import xarray as xr
 
 
 CANONICAL_COORDS = {"latitude", "longitude", "time"}
 
-# Common coordinate spellings seen in atmospheric and climate products.
 COORD_ALIASES: dict[str, tuple[str, ...]] = {
     "latitude": (
         "latitude", "lat", "Latitude", "LATITUDE", "nav_lat", "y_lat",
@@ -32,32 +29,31 @@ COORD_ALIASES: dict[str, tuple[str, ...]] = {
     ),
 }
 
-# Canonical scientific variables and common dataset-specific spellings.
 VARIABLE_ALIASES: dict[str, tuple[str, ...]] = {
     "precipitation": (
         "precipitation", "precip", "precipitationCal", "precipitationCalES",
-        "pr", "tp", "rain", "rainfall", "RAINC", "RAINNC", "RAINSH",
+        "pr", "tp", "rain", "rainfall", "rf", "APCP_sfc", "RAINC", "RAINNC", "RAINSH",
     ),
     "temperature": (
-        "temperature", "temp", "t2m", "T2", "tas", "air_temperature",
+        "temperature", "temp", "t2m", "TMP_2m", "TMP_sfc", "T2", "tas", "air_temperature",
     ),
     "surface_pressure": (
-        "surface_pressure", "sp", "ps", "PSFC", "pres", "pressure",
+        "surface_pressure", "sp", "ps", "PRES_sfc", "PSFC", "pres", "pressure",
     ),
     "relative_humidity": (
-        "relative_humidity", "rh", "RH2", "r", "hur",
+        "relative_humidity", "rh", "RH2", "RH_2m", "RH_prl", "r", "hur",
     ),
     "specific_humidity": (
         "specific_humidity", "q", "q2", "Q2", "hus",
     ),
     "u_wind": (
-        "u_wind", "u10", "U10", "ua", "uwnd", "u",
+        "u_wind", "u10", "U10", "UGRD_10m", "UGRD_prl", "ua", "uwnd", "u",
     ),
     "v_wind": (
-        "v_wind", "v10", "V10", "va", "vwnd", "v",
+        "v_wind", "v10", "V10", "VGRD_10m", "VGRD_prl", "va", "vwnd", "v",
     ),
     "geopotential": (
-        "geopotential", "z", "gh", "HGT", "GHT",
+        "geopotential", "z", "gh", "HGT_prl", "HGT", "GHT",
     ),
 }
 
@@ -76,6 +72,12 @@ DATASET_PRESETS: dict[str, dict[str, str]] = {
     },
     "imd": {
         "latitude": "lat", "longitude": "lon", "time": "time",
+    },
+    "imdaa": {
+        "latitude": "latitude", "longitude": "longitude", "time": "time",
+        "precipitation": "APCP_sfc", "temperature": "TMP_2m",
+        "surface_pressure": "PRES_sfc", "relative_humidity": "RH_2m",
+        "u_wind": "UGRD_10m", "v_wind": "VGRD_10m",
     },
 }
 
@@ -100,7 +102,7 @@ def _wrf_times(ds: xr.Dataset) -> xr.Dataset:
     if getattr(values, "ndim", 0) != 2:
         return ds
     try:
-        strings = [b"".join(row).decode("utf-8") if getattr(row, "dtype", None) is not None else "" for row in values]
+        strings = [b"".join(row).decode("utf-8") for row in values]
     except (AttributeError, UnicodeDecodeError, TypeError):
         try:
             strings = ["".join(str(x) for x in row) for row in values]
@@ -108,15 +110,12 @@ def _wrf_times(ds: xr.Dataset) -> xr.Dataset:
             return ds
     parsed = [s.replace("_", " ") for s in strings]
     try:
-        time = xr.DataArray(parsed, dims=("Time",)).astype("datetime64[ns]")
+        import pandas as pd
+        time = pd.to_datetime(parsed).to_numpy(dtype="datetime64[ns]")
     except Exception:
-        try:
-            import pandas as pd
-            time = xr.DataArray(pd.to_datetime(parsed), dims=("Time",))
-        except Exception:
-            return ds
+        return ds
     if "Time" in ds.dims:
-        ds = ds.assign_coords(time=("Time", time.values))
+        ds = ds.assign_coords(time=("Time", time))
     return ds
 
 
@@ -126,23 +125,7 @@ def normalize_coords(
     dataset: str | None = None,
     strict: bool = False,
 ) -> xr.Dataset:
-    """Rename common latitude/longitude/time coordinates to CF-like names.
-
-    Parameters
-    ----------
-    ds:
-        Input xarray dataset.
-    dataset:
-        Optional preset: ``"era5"``, ``"imd"``, ``"imerg"`` or ``"wrf"``.
-        Presets only provide preferred aliases; the operation remains explicit.
-    strict:
-        If true, raise when latitude or longitude cannot be identified.
-
-    Returns
-    -------
-    xarray.Dataset
-        Dataset using ``latitude``, ``longitude`` and, where available, ``time``.
-    """
+    """Rename common latitude/longitude/time coordinates to CF-like names."""
     ds = _wrf_times(ds)
     names = list(ds.coords) + [name for name in ds.variables if name not in ds.coords]
     preset = DATASET_PRESETS.get((dataset or "").lower(), {})
@@ -155,7 +138,6 @@ def normalize_coords(
             renames[source] = canonical
 
     out = ds.rename(renames) if renames else ds
-
     if strict:
         missing = [name for name in ("latitude", "longitude") if name not in out]
         if missing:
