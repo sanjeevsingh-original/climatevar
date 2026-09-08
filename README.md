@@ -11,6 +11,7 @@ A research-oriented Python library for reproducible climate and atmospheric scie
 ### Climate variability
 - Grouped monthly and day-of-year climatologies
 - Anomaly calculations
+- Data completeness and validity diagnostics
 
 ### Precipitation extremes
 - Rx1day — annual maximum 1-day precipitation
@@ -40,6 +41,15 @@ A research-oriented Python library for reproducible climate and atmospheric scie
 - Cosine-latitude weights
 - Area-weighted means for regular latitude/longitude grids
 
+### Dataset interoperability
+- Canonical `latitude`, `longitude`, and `time` coordinate names
+- Alias handling for common ERA5, IMD, IMDAA, IMERG, and WRF conventions
+- Canonical variable names such as `precipitation`, `temperature`, `surface_pressure`, `relative_humidity`, `u_wind`, and `v_wind`
+- Explicit user mappings for unusual or ambiguous products
+- WRF `Times` decoding foundation
+- Optional NetCDF/HDF5/GRIB dependencies
+- Normalization history stored in dataset metadata for auditability
+
 ### Data and modelling utilities
 - Explicit xarray NetCDF loading helper
 - WRF nested-domain grid-spacing calculations
@@ -48,10 +58,10 @@ A research-oriented Python library for reproducible climate and atmospheric scie
 ## Design principles
 
 1. **xarray-first:** preserve dimensions and coordinates.
-2. **No silent transformations:** units, calendars, masking, and regridding should be explicit.
+2. **No silent transformations:** units, calendars, masking, temporal accumulation, and regridding should be explicit.
 3. **Research transparency:** document statistical assumptions and conventions.
 4. **Test-driven development:** scientific functions should have regression tests.
-5. **Optional dependencies:** statistical and plotting features remain separated from the core installation.
+5. **Optional dependencies:** statistical, plotting, and specialized IO features remain separated from the core installation.
 6. **Reproducibility:** deterministic calculations and documented workflows are preferred over opaque convenience functions.
 
 ## Installation for development
@@ -63,14 +73,45 @@ python -m pip install -e ".[dev]"
 pytest
 ```
 
-## Example
+For NetCDF/HDF5/GRIB interoperability:
+
+```bash
+python -m pip install -e ".[io]"
+```
+
+## Example: normalize heterogeneous datasets
 
 ```python
 import xarray as xr
+from climatevar.io import normalize_dataset
+
+# ERA5: latitude/longitude/tp/t2m/sp conventions
+era5 = normalize_dataset(xr.open_dataset("era5.nc"), dataset="era5")
+
+# IMERG: lat/lon/precipitation conventions
+imerg = normalize_dataset(xr.open_dataset("IMERG_daily.nc"), dataset="imerg")
+
+# WRF: XLAT/XLONG and an explicitly selected precipitation field
+wrf = normalize_dataset(
+    xr.open_dataset("wrfout_d01_2020-06-01_00:00:00"),
+    dataset="wrf",
+    variables={"precipitation": "RAINNC"},
+)
+
+# The analysis layer can now use stable names.
+print(era5["latitude"], era5["longitude"], era5["precipitation"])
+```
+
+**Important:** normalization handles naming and basic structural differences; it does not silently convert units, temporal rates/accumulations, calendars, missing-value conventions, or grids. Those transformations must remain explicit because they can change scientific results.
+
+See [`docs/datasets.md`](docs/datasets.md) for dataset-specific guidance.
+
+## Example: precipitation indices
+
+```python
 from climatevar.precipitation import rx1day, rx5day
 
-rain = xr.open_dataset("daily_precipitation.nc")["pr"]
-
+rain = era5["precipitation"]
 annual_rx1day = rx1day(rain)
 annual_rx5day = rx5day(rain)
 ```
@@ -96,13 +137,16 @@ ETCCDI-inspired precipitation indices should be interpreted with their data-freq
 - [x] Spatial weighting
 - [x] WRF utility foundation
 - [x] Automated test workflow
-- [ ] Robust calendar-aware climate indices
+- [x] Dataset normalization foundation for ERA5 / IMD / IMDAA / IMERG / WRF
+- [ ] Formal calendar-aware climate indices
 - [ ] Dask-scale benchmarking and chunk-aware algorithms
-- [ ] ERA5 / IMERG / GRIB adapters
+- [ ] GPD/POT extremes and bootstrap uncertainty
+- [ ] Autocorrelation-aware trend significance
+- [ ] Formal SPI/SPEI implementation
+- [ ] ERA5 / IMERG / IMDAA reader adapters and metadata validation
 - [ ] WRF diagnostics and domain utilities
-- [ ] Bias/error diagnostics for model precipitation
-- [ ] ML/DL-ready feature engineering
-- [ ] Documentation site and worked scientific examples
+- [ ] Bias/error diagnostics and ML/DL-ready rainfall error tagging
+- [ ] Publication-quality visualization and worked scientific examples
 - [ ] API stability review
 - [ ] PyPI release and DOI/research citation metadata
 
