@@ -14,23 +14,28 @@ import xarray as xr
 
 ### `spi`
 
-`spi` calculates the formal Standardized Precipitation Index from accumulated precipitation. The default Gamma distribution includes explicit zero-precipitation probability treatment; `pearson3` is also supported.
+`spi` calculates the formal Standardized Precipitation Index from accumulated precipitation. The default Gamma distribution explicitly accounts for zero precipitation; Pearson Type III is also supported. The fitted distribution is estimated separately for each calendar month.
 
-For conventional monthly SPI-3:
+For conventional monthly SPI-3 using a 1991–2020 reference period:
 
 ```python
 from climatevar.drought import spi
 
 monthly_rain = xr.open_dataarray("monthly_precipitation.nc")
-spi3 = spi(monthly_rain, scale=3)
+spi3 = spi(
+    monthly_rain,
+    scale=3,
+    calibration_start="1991-01-01",
+    calibration_end="2020-12-31",
+)
 ```
 
-SPI-1, SPI-6 and SPI-12:
+Other scales:
 
 ```python
-spi1 = spi(monthly_rain, scale=1)
-spi6 = spi(monthly_rain, scale=6)
-spi12 = spi(monthly_rain, scale=12)
+spi1 = spi(monthly_rain, scale=1, calibration_start="1991-01-01", calibration_end="2020-12-31")
+spi6 = spi(monthly_rain, scale=6, calibration_start="1991-01-01", calibration_end="2020-12-31")
+spi12 = spi(monthly_rain, scale=12, calibration_start="1991-01-01", calibration_end="2020-12-31")
 ```
 
 Pearson Type III:
@@ -39,21 +44,57 @@ Pearson Type III:
 spi3_p3 = spi(monthly_rain, scale=3, distribution="pearson3")
 ```
 
-Input precipitation must be non-negative and should represent consistent time-step amounts (normally monthly totals for standard SPI). Parameters are fitted separately for each calendar month.
+`min_nonzero=10` is the default minimum number of non-zero calibration values for each calendar month. If the calibration sample is insufficient, the corresponding SPI values are returned as missing rather than producing an unstable fit. `clip=` may be used only when a study protocol explicitly requires bounded index values.
 
 ### `spei`
 
-SPEI is calculated from climatic water balance `P - PET` using a log-logistic (Fisk) distribution fitted by calendar month.
+SPEI uses the climatic water balance `P - PET`, accumulated over the requested time scale, and standardizes the resulting distribution using a three-parameter log-logistic distribution.
 
 ```python
 from climatevar.drought import spei
 
 monthly_pet = xr.open_dataarray("monthly_pet.nc")
-spei3 = spei(monthly_rain, monthly_pet, scale=3)
-spei12 = spei(monthly_rain, monthly_pet, scale=12)
+spei3 = spei(
+    monthly_rain,
+    monthly_pet,
+    scale=3,
+    calibration_start="1991-01-01",
+    calibration_end="2020-12-31",
+)
+spei12 = spei(
+    monthly_rain,
+    monthly_pet,
+    scale=12,
+    calibration_start="1991-01-01",
+    calibration_end="2020-12-31",
+)
 ```
 
-Document the PET method and calibration/reference period in research publications. PET and precipitation must have matching dimensions and coordinates.
+Document the PET method and calibration/reference period in publications. PET and precipitation must have matching dimensions and sizes.
+
+### `drought_category`
+
+Convert SPI/SPEI into standard drought/wetness classes:
+
+```python
+from climatevar.drought import drought_category
+
+category = drought_category(spi3)
+```
+
+The classes are extreme drought (`<= -2`), severe drought (`-2 to -1.5`), moderate drought (`-1.5 to -1`), near normal (`-1 to 1`), moderately wet (`1 to 1.5`), severely wet (`1.5 to 2`) and extremely wet (`>= 2`).
+
+### `fit_quality`
+
+Basic diagnostics for the standardized output:
+
+```python
+from climatevar.drought import fit_quality
+
+quality = fit_quality(spi3)
+```
+
+The returned Dataset contains `mean`, `std`, `normality_pvalue`, and `n`. These are diagnostics of the standardized index and should complement, not replace, formal goodness-of-fit tests of the source distribution.
 
 ### `spi_like`
 
@@ -370,7 +411,7 @@ import xarray as xr
 from climatevar.io.normalize import normalize_dataset
 from climatevar.precipitation import daily_amount, PRCPTOT, Rx1day
 from climatevar.seasonal import monsoon_total
-from climatevar.drought import spi
+from climatevar.drought import spi, drought_category, fit_quality
 from climatevar.trends import mann_kendall, sens_slope
 
 raw = xr.open_dataset("era5.nc")
@@ -383,8 +424,9 @@ ism = monsoon_total(daily)
 
 # Monthly totals for conventional SPI.
 monthly = daily.resample(time="MS").sum()
-spi3 = spi(monthly, scale=3)
-spi12 = spi(monthly, scale=12)
+spi3 = spi(monthly, scale=3, calibration_start="1991-01-01", calibration_end="2020-12-31")
+categories = drought_category(spi3)
+quality = fit_quality(spi3)
 
 mk = mann_kendall(ism)
 slope = sens_slope(ism)
@@ -392,4 +434,4 @@ slope = sens_slope(ism)
 
 ## Research reproducibility checklist
 
-For publication-quality work, report dataset/version, domain, temporal aggregation, units, calendar, completeness rule, SPI/SPEI distribution and calibration period, PET method for SPEI, percentile baseline, event thresholds, spatial weighting, and trend/extreme-value assumptions.
+For publication-quality work, report dataset/version, domain, temporal aggregation, units, calendar, completeness rule, SPI/SPEI distribution and calibration period, minimum calibration sample, PET method for SPEI, percentile baseline, event thresholds, spatial weighting, and trend/extreme-value assumptions.
