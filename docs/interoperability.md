@@ -6,15 +6,15 @@
 
 Common fields include `latitude`, `longitude`, `time`, `precipitation`, `temperature`, `surface_pressure`, `relative_humidity`, `specific_humidity`, `u_wind`, `v_wind` and `geopotential`.
 
-## SI units
+## Units
 
-`normalize_dataset(..., si=True)` is the default. Recognized variables are converted to SI units:
+`normalize_dataset(..., si=True)` is the default. Recognized variables use SI units **except precipitation amount, which is intentionally represented in millimetres (`mm`)** because precipitation depth and rainfall extremes are conventionally analysed and reported in mm.
 
-| Quantity | SI unit |
+| Quantity | climatevar unit |
 |---|---|
 | temperature | K |
 | pressure | Pa |
-| precipitation amount | m |
+| precipitation amount | **mm** |
 | precipitation flux | kg m-2 s-1 |
 | relative humidity | 1 |
 | specific humidity | kg kg-1 |
@@ -25,7 +25,14 @@ The conversion is explicit and provenance is stored in variable attributes. A va
 
 ### Important precipitation rule
 
-A precipitation **amount** and precipitation **flux/rate** are different physical quantities. For example, ERA5 accumulated precipitation can be represented as a depth, while CMIP-style precipitation is often a flux. `climatevar` therefore refuses unsafe amount/rate conversions unless the caller supplies an appropriate rate unit or a dedicated temporal transformation.
+A precipitation **amount** and precipitation **flux/rate** are different physical quantities. Precipitation amounts are always normalized to **mm**. For example, ERA5 accumulated precipitation represented in metres is converted to mm. CMIP-style precipitation is often a flux, so it remains a flux in `kg m-2 s-1` rather than being incorrectly treated as a depth. A rate/flux is never silently converted to mm without an explicit temporal integration step.
+
+For rainfall analysis, the canonical `precipitation` variable therefore has one of two explicit states:
+
+- `units="mm"` with `climatevar:quantity="precipitation_amount"`
+- `units="kg m-2 s-1"` with `climatevar:quantity="precipitation_flux"`
+
+This distinction prevents physically incorrect comparisons between accumulated rainfall and precipitation rates.
 
 ## Calendars and frequency
 
