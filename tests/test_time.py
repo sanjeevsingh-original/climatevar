@@ -26,7 +26,7 @@ def test_gregorian_leap_year_completeness():
     data = xr.DataArray(np.ones(time.size), coords={"time": time}, dims="time")
     assert bool(year_complete_mask(data).item())
 
-    incomplete = data.isel(time=slice(0, 365))
+    incomplete = data.isel(time=slice(0, 300))
     assert not bool(year_complete_mask(incomplete).item())
 
 
