@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
+import numpy as np
 import xarray as xr
 
-RD = 287.05
-CP = 1004.0
-EPSILON = 0.622
-LV = 2.5e6
+RD_CP = 0.2854
 
 
-def potential_temperature(temperature: xr.DataArray | float, pressure: xr.DataArray | float, p0: float = 100000.0):
+def potential_temperature(
+    temperature: xr.DataArray | float,
+    pressure: xr.DataArray | float,
+    p0: float = 100000.0,
+):
     """Calculate dry potential temperature in K.
 
     Parameters use SI units: temperature in K and pressure in Pa.
     """
-    return temperature * (p0 / pressure) ** (RD / CP)
+    return temperature * (p0 / pressure) ** RD_CP
 
 
 def equivalent_potential_temperature(
@@ -24,17 +26,22 @@ def equivalent_potential_temperature(
     specific_humidity: xr.DataArray | float,
     p0: float = 100000.0,
 ):
-    """Approximate equivalent potential temperature (Bolton-style form).
+    """Calculate approximate equivalent potential temperature in K.
 
-    Inputs are temperature (K), pressure (Pa), and specific humidity (kg/kg).
-    The calculation estimates vapor pressure from specific humidity and uses
-    Bolton's commonly applied lifting-condensation-level approximation.
+    This follows the widely used Bolton formulation. Inputs are temperature
+    (K), pressure (Pa), and specific humidity (kg/kg).
     """
-    theta = potential_temperature(temperature, pressure, p0=p0)
-    q = xr.DataArray(specific_humidity) if not isinstance(specific_humidity, xr.DataArray) else specific_humidity
     t = xr.DataArray(temperature) if not isinstance(temperature, xr.DataArray) else temperature
     p = xr.DataArray(pressure) if not isinstance(pressure, xr.DataArray) else pressure
-    e = q * p / (EPSILON + (1.0 - EPSILON) * q)
-    e_hpa = e / 100.0
-    tl = 1.0 / (1.0 / (t - 55.0) - xr.apply_ufunc(xr.ufuncs.log, e_hpa / 6.112) / 2840.0) + 55.0
-    return theta * xr.apply_ufunc(xr.ufuncs.exp, (LV * q) / (CP * tl))
+    q = xr.DataArray(specific_humidity) if not isinstance(specific_humidity, xr.DataArray) else specific_humidity
+    if np.any(t <= 0) or np.any(p <= 0):
+        raise ValueError("temperature and pressure must be positive.")
+    if np.any((q < 0) | (q >= 1)):
+        raise ValueError("specific_humidity must satisfy 0 <= q < 1.")
+
+    r = q / (1.0 - q)
+    e_pa = r * p / (0.622 + r)
+    e_hpa = e_pa / 100.0
+    tl = 1.0 / (1.0 / (t - 55.0) - np.log(e_hpa / 6.112) / 2840.0) + 55.0
+    theta_l = t * (p0 / p) ** (RD_CP * (1.0 - 0.28 * r))
+    return theta_l * np.exp((3036.0 / tl - 1.78) * r * (1.0 + 0.448 * r))
