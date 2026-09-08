@@ -5,6 +5,7 @@ repo_url: https://github.com/sanjeevsingh-original/climatevar
 
 nav:
   - Home: index.md
+  - Common data model: datasets.md
 
 markdown_extensions:
   - admonition

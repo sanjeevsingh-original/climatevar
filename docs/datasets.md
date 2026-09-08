@@ -1,75 +1,42 @@
-# Heterogeneous climate datasets
+# Common climate data model
 
-`climatevar` uses **xarray** as its internal data model, but real climate datasets do not use one universal naming convention. The IO normalization layer converts common coordinate and variable names to a small canonical vocabulary before analysis.
+`climatevar` uses a canonical xarray schema so analysis functions do not need dataset-specific variable names.
 
-## Supported conventions
+## Canonical fields
 
-| Source | Typical coordinates | Common precipitation variable | Typical format |
-|---|---|---|---|
-| ERA5 | `latitude`, `longitude`, `time` | `tp` | NetCDF / GRIB |
-| IMD | `lat`, `lon`, `time` (product dependent) | `rain`, `rf`, `precip` (product dependent) | NetCDF / text / binary |
-| IMERG | `lat`, `lon`, `time` | `precipitation` or `precipitationCal` depending on product/version | NetCDF / HDF5 |
-| WRF | `XLAT`, `XLONG`, `Times`/`Time` | `RAINNC` + `RAINC` | NetCDF |
+| Physical quantity | climatevar name | Common examples |
+|---|---|---|
+| latitude | `latitude` | `lat`, `Latitude`, `XLAT` |
+| longitude | `longitude` | `lon`, `Longitude`, `XLONG` |
+| time | `time` | `time`, `valid_time`, `Times` |
+| precipitation | `precipitation` | ERA5 `tp`, IMERG `precipitation`, IMD `rainfall`, WRF `RAINNC` |
+| temperature | `temperature` | ERA5 `t2m`, IMDAA `TMP_2m`, WRF `T2` |
+| surface pressure | `surface_pressure` | ERA5 `sp`, IMDAA `PRES_sfc`, WRF `PSFC` |
+| relative humidity | `relative_humidity` | `rh`, `RH2`, IMDAA `RH_2m` |
+| specific humidity | `specific_humidity` | `q`, `Q2`, IMDAA `SPFH_2m` |
+| u wind | `u_wind` | `u10`, `U10`, IMDAA `UGRD_10m` |
+| v wind | `v_wind` | `v10`, `V10`, IMDAA `VGRD_10m` |
 
-The exact variable names can change between product versions, so **explicit mappings remain the preferred scientific practice**. IMERG V07 daily data, for example, documents `precipitation` as the daily precipitation-rate variable and `lat`/`lon` as coordinates. citeturn0search3 WRF output commonly uses `XLAT` and `XLONG` for mass-grid latitude/longitude and may contain staggered-grid coordinate variables such as `XLAT_U`/`XLONG_U`. citeturn0search2 ERA5 GRIB opened through `cfgrib` exposes `latitude` and `longitude` directly to xarray. citeturn0search0
-
-## Canonicalize a dataset
+## Example
 
 ```python
 import xarray as xr
 from climatevar.io import normalize_dataset
 
-# ERA5 NetCDF/GRIB already using standard coordinate names
-raw = xr.open_dataset("era5.nc")
+raw = xr.open_dataset("dataset.nc")
 ds = normalize_dataset(raw, dataset="era5")
-
-# The analysis layer can now use stable names.
-precip = ds["precipitation"]
-lat = ds["latitude"]
-lon = ds["longitude"]
+rain = ds["precipitation"]
 ```
 
-## IMERG
+Normalization changes **names**, not physical meaning. Unit conversion and temporal interpretation are explicit operations. This is important for precipitation because reanalysis/model products may store accumulated depth or rates, while observations may represent point measurements. CF conventions likewise rely on metadata such as `standard_name` and `units` to make quantities comparable. citeturn0search1turn0search0
 
-```python
-raw = xr.open_dataset("IMERG_daily.nc")
-ds = normalize_dataset(raw, dataset="imerg")
-precip = ds["precipitation"]
-```
+## Dataset-specific notes
 
-## WRF
+- **ERA5 / ERA5-Land:** total precipitation is commonly `tp` and represents accumulated precipitation depth; ERA5 documentation describes its units as metres. Do not treat it as a rate without converting according to the accumulation period. citeturn0search3turn0search4
+- **WRF:** precipitation may be split between convective and non-convective accumulations. Users should explicitly choose or combine fields rather than having the library guess.
+- **Station data:** use `climatevar.io.stations.normalize_station_dataframe()` for CSV/tabular observations.
+- **CMIP-style data:** CF metadata should be preferred over filename-based guessing. `standard_name`, `units`, coordinate metadata and calendar information are more reliable than variable names alone. citeturn0search1turn0search2
 
-WRF is more complicated because its latitude/longitude coordinates can be 2-D and its rainfall is often accumulated in separate fields. The normalization layer handles the coordinate naming, but it **does not silently add `RAINC` and `RAINNC`** because doing so without checking the model output convention could change the scientific meaning.
+## Scientific safety rule
 
-```python
-raw = xr.open_dataset("wrfout_d01_2020-06-01_00:00:00")
-ds = normalize_dataset(
-    raw,
-    dataset="wrf",
-    variables={"precipitation": "RAINNC"},
-)
-```
-
-If total accumulated convective + non-convective rainfall is intended, construct it explicitly:
-
-```python
-total_rain = raw["RAINC"] + raw["RAINNC"]
-```
-
-## Explicit mappings for IMD or custom products
-
-When a product uses an unusual name, pass the mapping instead of relying on aliases:
-
-```python
-ds = normalize_dataset(
-    raw,
-    variables={"precipitation": "rf"},
-    strict=True,
-)
-```
-
-The normalization history is stored in `ds.attrs["climatevar:normalization"]`, so transformations remain auditable.
-
-## Important scientific limitation
-
-Normalization solves **naming and structural interoperability**. It does not automatically solve differences in units, temporal accumulation/averaging, calendars, grids, missing-value conventions, or spatial resolution. Those require dataset-aware transformations and validation. This distinction is deliberate: a library for research should not silently convert a rate to an accumulation or combine incompatible rainfall definitions.
+`climatevar` will normalize aliases, but it will not silently perform scientifically consequential transformations such as regridding, unit conversion, accumulated-to-rate conversion, calendar conversion, or WRF rainfall-component summation.
