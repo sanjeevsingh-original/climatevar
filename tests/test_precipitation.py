@@ -1,9 +1,20 @@
 import numpy as np
 import pandas as pd
-import pytest
 import xarray as xr
 
-from climatevar.precipitation import cdd, cwd, prcptot, r10mm, r20mm, r95p, r99p, rx1day, rx5day
+from climatevar.precipitation import (
+    cdd,
+    cwd,
+    daily_amount,
+    normalize_precipitation,
+    prcptot,
+    r10mm,
+    r20mm,
+    r95p,
+    r99p,
+    rx1day,
+    rx5day,
+)
 
 
 def make_data(units="mm"):
@@ -50,20 +61,58 @@ def test_amount_units_are_normalized_to_mm():
     assert result.attrs["units"] == "mm"
 
 
-def test_missing_units_are_rejected():
+def test_missing_units_are_implicitly_treated_as_mm():
     data = make_data().drop_attrs()
-    with pytest.raises(ValueError, match="explicit precipitation units"):
-        rx1day(data)
+    assert rx1day(data).item() == 30
 
 
-def test_precipitation_rate_is_rejected():
+def test_daily_rate_is_accepted_implicitly():
     data = make_data("mm/day")
-    with pytest.raises(ValueError, match="rates/fluxes"):
-        rx1day(data)
+    result = rx1day(data)
+    assert result.item() == 30
 
 
-def test_percentile_reference_must_be_mm():
+def test_hourly_rate_is_aggregated_to_daily_amount():
+    time = pd.date_range("2000-01-01", periods=48, freq="h")
+    data = xr.DataArray(
+        np.ones(48),
+        coords={"time": time},
+        dims="time",
+        attrs={"units": "mm/hr"},
+    )
+    daily = daily_amount(data)
+    assert daily.attrs["units"] == "mm"
+    assert np.allclose(daily.values, [24.0, 24.0])
+    assert rx1day(data).item() == 24.0
+
+
+def test_native_normalization_uses_sampling_resolution():
+    hourly = xr.DataArray(
+        np.ones(24),
+        coords={"time": pd.date_range("2000-01-01", periods=24, freq="h")},
+        dims="time",
+        attrs={"units": "kg m-2 s-1"},
+    )
+    daily = make_data("mm")
+    hourly_result = normalize_precipitation(hourly)
+    daily_result = normalize_precipitation(daily)
+    assert hourly_result.attrs["units"] == "mm/hr"
+    assert daily_result.attrs["units"] == "mm/day"
+    assert np.allclose(hourly_result.values, 3600.0)
+    assert np.allclose(daily_result.values, daily.values)
+
+
+def test_percentile_reference_accepts_common_amount_units():
     data = make_data()
     threshold = xr.DataArray(0.009, attrs={"units": "m"})
-    with pytest.raises(ValueError, match="units='mm'"):
-        r95p(data, reference=threshold)
+    assert r95p(data, reference=threshold).item() == 60
+
+
+def test_unsupported_precipitation_units_raise():
+    data = make_data("inches")
+    try:
+        rx1day(data)
+    except ValueError as exc:
+        assert "Unsupported precipitation units" in str(exc)
+    else:
+        raise AssertionError("Unsupported precipitation units should raise ValueError")
