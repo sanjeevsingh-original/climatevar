@@ -5,8 +5,10 @@ repo_url: https://github.com/sanjeevsingh-original/climatevar
 
 nav:
   - Home: index.md
-  - Common data model: datasets.md
-  - Dataset interoperability: interoperability.md
+  - Getting Started:
+      - Common data model: datasets.md
+      - Dataset interoperability: interoperability.md
+      - API cookbook: api.md
 
 markdown_extensions:
   - admonition
