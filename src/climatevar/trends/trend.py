@@ -58,9 +58,6 @@ def _modified_mk_1d(values, alpha=0.05, max_lag=None):
         return np.nan, np.nan, np.nan, np.nan, float(n)
 
     s, tau, _, _ = _mk_stats(y)
-    # Yue & Wang-style effective sample size correction.  Estimate
-    # persistence from the detrended residuals so a monotonic trend does not
-    # masquerade as serial correlation.
     slope = _sen_1d(y)
     residual = y - slope * np.arange(n)
     max_lag = max_lag or min(n - 1, int(np.sqrt(n) * 3))
@@ -74,6 +71,37 @@ def _modified_mk_1d(values, alpha=0.05, max_lag=None):
     z = (s - 1.0) / np.sqrt(var_s) if s > 0 else (s + 1.0) / np.sqrt(var_s) if s < 0 else 0.0
     p = float(2.0 * norm.sf(abs(z)))
     return s, tau, p, n_eff, float(n)
+
+
+def _block_indices(n: int, block_length: int, rng: np.random.Generator) -> np.ndarray:
+    """Generate moving-block bootstrap indices of length ``n``."""
+    if block_length < 1 or block_length > n:
+        raise ValueError("block_length must be between 1 and the number of observations")
+    starts = rng.integers(0, n - block_length + 1, size=int(np.ceil(n / block_length)))
+    return np.concatenate([np.arange(s, s + block_length) for s in starts])[:n]
+
+
+def _sen_slope_ci_1d(values, alpha=0.05, n_resamples=1000, block_length=None, random_state=0):
+    y = _clean(values)
+    n = y.size
+    if n < 3:
+        return np.nan, np.nan, np.nan, float(n)
+    if not 0 < alpha < 1:
+        raise ValueError("alpha must be between 0 and 1")
+    if n_resamples < 1:
+        raise ValueError("n_resamples must be at least 1")
+    if block_length is None:
+        block_length = max(1, int(round(n ** (1.0 / 3.0))))
+    if block_length < 1 or block_length > n:
+        raise ValueError("block_length must be between 1 and the number of observations")
+
+    estimate = _sen_1d(y)
+    rng = np.random.default_rng(random_state)
+    slopes = np.empty(n_resamples, dtype=float)
+    for i in range(n_resamples):
+        slopes[i] = _sen_1d(y[_block_indices(n, block_length, rng)])
+    q = np.quantile(slopes, [alpha / 2.0, 1.0 - alpha / 2.0])
+    return estimate, float(q[0]), float(q[1]), float(n)
 
 
 def mann_kendall(data: xr.DataArray, dim: str = "time") -> xr.Dataset:
@@ -128,3 +156,57 @@ def sens_slope(data: xr.DataArray, dim: str = "time") -> xr.DataArray:
     if dim not in data.dims:
         raise ValueError(f"Dimension {dim!r} is not present in the input data.")
     return xr.apply_ufunc(_sen_1d, data, input_core_dims=[[dim]], output_core_dims=[[]], vectorize=True, dask="parallelized", output_dtypes=[float])
+
+
+def sens_slope_ci(
+    data: xr.DataArray,
+    dim: str = "time",
+    alpha: float = 0.05,
+    n_resamples: int = 1000,
+    block_length: int | None = None,
+    random_state: int | None = 0,
+) -> xr.Dataset:
+    """Estimate Sen's slope with a moving-block bootstrap confidence interval.
+
+    The point estimate is the ordinary Sen slope. Confidence limits are
+    percentile limits from a moving-block bootstrap, which preserves local
+    serial dependence better than an IID bootstrap. The slope is expressed
+    per observation step, matching :func:`sens_slope`.
+
+    ``random_state`` is recorded for reproducibility. Set it to ``None`` for
+    a non-deterministic generator.
+    """
+    if dim not in data.dims:
+        raise ValueError(f"Dimension {dim!r} is not present in the input data.")
+    if not 0 < alpha < 1:
+        raise ValueError("alpha must be between 0 and 1")
+    if n_resamples < 1:
+        raise ValueError("n_resamples must be at least 1")
+    if block_length is not None and block_length < 1:
+        raise ValueError("block_length must be at least 1")
+    result = xr.apply_ufunc(
+        _sen_slope_ci_1d,
+        data,
+        kwargs={
+            "alpha": alpha,
+            "n_resamples": n_resamples,
+            "block_length": block_length,
+            "random_state": random_state,
+        },
+        input_core_dims=[[dim]],
+        output_core_dims=[[], [], [], []],
+        vectorize=True,
+        dask="parallelized",
+        output_dtypes=[float, float, float, float],
+    )
+    out = xr.Dataset({"sen_slope": result[0], "ci_lower": result[1], "ci_upper": result[2], "n": result[3]})
+    out.attrs.update({
+        "method": "moving-block bootstrap percentile interval",
+        "alpha": alpha,
+        "confidence_level": 1.0 - alpha,
+        "n_resamples": n_resamples,
+        "block_length": "automatic" if block_length is None else block_length,
+        "random_state": random_state,
+        "slope_units": "per observation step",
+    })
+    return out
