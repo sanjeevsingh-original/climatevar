@@ -10,6 +10,7 @@ from __future__ import annotations
 import numpy as np
 import xarray as xr
 
+from ..time import year_complete_mask
 from .normalize import daily_amount
 
 
@@ -25,16 +26,7 @@ def _validate_threshold(value: float, name: str) -> float:
 
 
 def _complete_year_mask(data: xr.DataArray, dim: str, min_valid_fraction: float) -> xr.DataArray:
-    if not 0 < min_valid_fraction <= 1:
-        raise ValueError("min_valid_fraction must be greater than 0 and at most 1.")
-    return data.notnull().groupby(f"{dim}.year").mean(dim=dim) >= min_valid_fraction
-
-
-def _apply_completeness(result: xr.DataArray, complete: xr.DataArray) -> xr.DataArray:
-    year_dim = next((d for d in complete.dims if d not in result.dims), None)
-    if year_dim is None:
-        return result
-    return result.where(complete)
+    return year_complete_mask(data, dim, min_valid_fraction=min_valid_fraction)
 
 
 def _with_mm_units(result: xr.DataArray) -> xr.DataArray:
@@ -47,14 +39,13 @@ def _with_mm_units(result: xr.DataArray) -> xr.DataArray:
 def rx1day(data: xr.DataArray, dim: str = "time", min_valid_fraction: float = 0.9) -> xr.DataArray:
     """Annual maximum 1-day precipitation (Rx1day), in mm.
 
-    ``min_valid_fraction`` prevents incomplete years from being interpreted as
-    valid annual extremes.
+    ``min_valid_fraction`` is evaluated against the actual calendar year
+    length, including 366 days in Gregorian leap years.
     """
     data = _validate_daily(data, dim)
     complete = _complete_year_mask(data, dim, min_valid_fraction)
     result = data.groupby(f"{dim}.year").max(dim=dim, skipna=True)
-    result = result.where(complete)
-    return _with_mm_units(result)
+    return _with_mm_units(result.where(complete))
 
 
 def rx5day(data: xr.DataArray, dim: str = "time", min_valid_fraction: float = 0.9) -> xr.DataArray:
@@ -202,5 +193,5 @@ def cwd(data: xr.DataArray, dim: str = "time", wet_day_threshold: float = 1.0, m
 def cdd(data: xr.DataArray, dim: str = "time", dry_day_threshold: float = 1.0, min_valid_fraction: float = 0.9) -> xr.DataArray:
     """Annual maximum consecutive dry days (CDD)."""
     data = _validate_daily(data, dim)
-    threshold = _validate_threshold(dry_day_threshold, "dry_day_threshold")
+    threshold = _validate_threshold(dry_day_threshold, "threshold")
     return _max_run(data < threshold, dim, _complete_year_mask(data, dim, min_valid_fraction))
