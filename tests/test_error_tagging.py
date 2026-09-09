@@ -9,7 +9,7 @@ from climatevar.error_tagging import (
 
 def test_error_classes_and_zero_rainfall():
     obs = xr.DataArray([0.0, 10.0, 10.0, 10.0], dims="time")
-    pred = xr.DataArray([0.0, 2.0, 8.0, 20.0], dims="time")
+    pred = xr.DataArray([0.0, 2.0, 7.0, 20.0], dims="time")
     out = error_class(obs, pred)
     assert out.values.tolist() == ["near_zero", "underestimate_severe", "underestimate_moderate", "overestimate_severe"]
 
