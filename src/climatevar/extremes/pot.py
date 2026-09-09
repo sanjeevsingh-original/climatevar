@@ -41,9 +41,9 @@ def decluster_exceedances(data:xr.DataArray,threshold:float,run_length:int=3,dim
                 gap+=1
                 if gap>=run_length:break
             j+=1
-        stop=j-gap if j<n else n
-        idx=np.where(exceed[i:stop])[0]
-        if idx.size: out[i+idx[np.argmax(y[i+idx])]]=y[i+idx[np.argmax(y[i+idx])]]
+        idx=np.where(exceed[i:j])[0]
+        if idx.size:
+            k=i+idx[np.argmax(y[i+idx])]; out[k]=y[k]
         i=max(j,i+1)
     return xr.DataArray(out,coords=data.coords,dims=data.dims,attrs=data.attrs,name=data.name)
 
@@ -125,11 +125,7 @@ def gpd_goodness_of_fit_bootstrap(excesses,dim="time",n_resamples=1000,alpha=.05
     return xr.Dataset({"ks_statistic":obs_ks,"ks_pvalue_bootstrap":float(pk),"ad_statistic":obs_ad,"ad_pvalue_bootstrap":float(pa),"n_exceedances":y.size,"n_resamples":n_resamples,"alpha":alpha})
 
 def pot_threshold_uncertainty(data,thresholds,return_period,dim="time",alpha=.05,n_resamples=500,random_state=0):
-    """Propagate threshold choice as an empirical return-level envelope.
-
-    Each candidate threshold is fitted separately; the returned interval is the
-    envelope across thresholds, not a probability-weighted confidence interval.
-    """
+    """Propagate threshold choice as an empirical return-level envelope."""
     out=pot_threshold_sensitivity(data,thresholds,return_period,dim);rl=out.return_level.values[np.isfinite(out.return_level.values)]
     if rl.size==0:return xr.Dataset({"return_level_min":np.nan,"return_level_median":np.nan,"return_level_max":np.nan,"threshold_count":0})
     return xr.Dataset({"return_level_min":float(np.min(rl)),"return_level_median":float(np.median(rl)),"return_level_max":float(np.max(rl)),"threshold_count":int(rl.size),"alpha":alpha,"n_resamples":n_resamples})
@@ -140,15 +136,13 @@ def gpd_fit_nonstationary(excesses,x,dim="time"):
     if y.size!=cov.size:raise ValueError("excesses and covariate must have the same number of finite observations.")
     finite=np.isfinite(y)&np.isfinite(cov);y=y[finite];cov=cov[finite]
     if y.size<10 or np.any(y<0):raise ValueError("at least 10 non-negative finite excesses are required.")
-    xc=(cov-np.mean(cov))/(np.std(cov) or 1.0)
-    s0= max(float(np.mean(y)),np.finfo(float).eps)
-    init=np.array([0.0,np.log(s0),0.0])
+    xc=(cov-np.mean(cov))/(np.std(cov) or 1.0);s0=max(float(np.mean(y)),np.finfo(float).eps);init=np.array([0.0,np.log(s0),0.0])
     def nll(par):
         xi,b0,b1=par; sigma=np.exp(b0+b1*xc); z=1+xi*y/sigma
         if np.any(sigma<=0) or np.any(z<=0):return 1e100
         if abs(xi)<1e-6:return np.sum(np.log(sigma)+y/sigma)
         return np.sum(np.log(sigma)+(1/xi+1)*np.log(z))
-    fit=minimize(nll,init,method="Nelder-Mead",options={"maxiter":5000});
+    fit=minimize(nll,init,method="Nelder-Mead",options={"maxiter":5000})
     if not fit.success:raise RuntimeError(f"Non-stationary GPD optimization failed: {fit.message}")
     xi,b0,b1=fit.x
     return xr.Dataset({"shape":float(xi),"log_scale_intercept":float(b0),"log_scale_covariate":float(b1),"covariate_mean":float(np.mean(cov)),"covariate_std":float(np.std(cov) or 1.0),"n_exceedances":int(y.size),"nll":float(fit.fun)})
