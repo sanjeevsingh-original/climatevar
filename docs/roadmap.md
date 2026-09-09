@@ -83,11 +83,17 @@ POT now provides threshold exploration, GPD fitting, declustering, return levels
 - [x] Spatial and conditional error diagnostics
 - [x] Error decomposition by intensity, season and synoptic-ready feature hooks
 - [x] ML/DL-ready rainfall error-tagging datasets
-- [ ] Explainable ML diagnostics for model rainfall errors
+- [x] Baseline Random Forest and histogram gradient-boosting classifiers
+- [x] Optional XGBoost classifier interface
+- [x] Class-imbalance-aware training and calibrated probabilities
+- [x] Time-, group- and spatial-block-aware evaluation
+- [x] Validation-set permutation importance
+- [x] Optional TreeSHAP explanations
 - [ ] Calibrated model-specific error-class thresholds and sensitivity analysis
+- [ ] Deep CNN/ConvLSTM/Transformer rainfall-error classifier
 
 ### Phase 6 current focus
-`climatevar.error_tagging` now separates post-hoc diagnostic error tagging from prospective error prediction, provides configurable rainfall-intensity and error classes, preserves traceable verification features, and provides chronological, event-group and spatial-block split utilities. Random row-wise splitting should not be used as the default for autocorrelated rainfall data. The next scientific step is model fitting and explainability without introducing truth leakage.
+`climatevar.error_tagging` now separates post-hoc diagnostic error tagging from prospective error prediction, provides configurable rainfall-intensity and error classes, preserves traceable verification features, and provides chronological, event-group and spatial-block split utilities. Optional ML tooling provides reproducible Random Forest and histogram-gradient-boosting baselines, optional XGBoost, class-balanced training, probability calibration, leakage-aware cross-validation, permutation importance and TreeSHAP. Deep neural models remain deliberately deferred until the tabular benchmark and evaluation protocol are established.
 
 ## Phase 7 — Research-scale computation
 - [ ] Dask-aware trend and bootstrap algorithms
