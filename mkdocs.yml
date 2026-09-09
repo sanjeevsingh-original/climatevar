@@ -10,6 +10,7 @@ nav:
       - Dataset interoperability: interoperability.md
       - API cookbook: api.md
       - Trend analysis: trends.md
+      - Precipitation verification: verification.md
       - Extreme-value analysis: extremes.md
   - Project:
       - Scientific roadmap: roadmap.md
