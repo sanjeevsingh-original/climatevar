@@ -10,6 +10,63 @@ import pandas as pd
 import xarray as xr
 ```
 
+## Peaks-over-threshold extremes
+
+POT analysis models excesses above a sufficiently high threshold with a generalized Pareto distribution (GPD). Threshold choice is a model assumption, not a cosmetic setting: inspect parameter stability and exceedance counts across several candidate thresholds. For daily rainfall, dependent exceedances should generally be declustered before fitting an independent-exceedance model. These diagnostics are especially important for Indian monsoon rainfall, where multi-day storm systems can generate clusters of exceedances. Recent Indian precipitation research also demonstrates substantial sensitivity of return-level estimates to threshold choice. citeturn0search0turn0search4
+
+```python
+from climatevar.extremes import (
+    pot_exceedances,
+    gpd_fit,
+    decluster_exceedances,
+    threshold_diagnostics,
+    pot_return_level,
+    pot_return_level_ci,
+)
+
+rain = xr.open_dataarray("daily_rainfall.nc")
+threshold = 100.0  # mm/day; determine scientifically for your study region
+
+excess = pot_exceedances(rain, threshold)
+fit = gpd_fit(excess)
+
+# Check several candidate thresholds before selecting one.
+diag = threshold_diagnostics(rain, [80, 90, 100, 110, 120, 130])
+
+# For dependent daily extremes, retain cluster maxima.
+peaks = decluster_exceedances(rain, threshold, run_length=3)
+peak_excess = peaks - threshold
+
+# Example: rate per day and return period in days.
+rate = float(fit["n_exceedances"] / rain.count())
+rl100 = pot_return_level(
+    threshold,
+    float(fit["shape"]),
+    float(fit["scale"]),
+    rate,
+    return_period=100 * 365.25,
+)
+
+ci = pot_return_level_ci(
+    rain,
+    threshold,
+    return_period=100 * 365.25,
+    decluster_run_length=3,
+    n_resamples=2000,
+    random_state=42,
+)
+```
+
+The GPD uses the standard excess formulation with shape `xi` and scale `sigma`; negative shape implies a finite upper endpoint. POT return levels combine the fitted GPD tail with the exceedance rate, so the return-period unit must match the rate unit. citeturn0search0turn0search1
+
+`threshold_diagnostics` provides exceedance counts/rates and GPD shape/scale estimates over a candidate threshold sequence. A stable region of the shape parameter, adequate exceedance count, and sensible mean-excess behavior are useful evidence when selecting a threshold; no single automatic threshold should be accepted without diagnostics. citeturn0search2turn0search9
+
+`decluster_exceedances` uses a runs rule and retains the maximum from each cluster. The run length is application-specific and should be justified from the temporal dependence of the variable rather than treated as universal. POT methodology requires attention to independence because clustered extremes violate the simple independent-exceedance assumption. citeturn0search0
+
+`pot_return_level_ci` uses a reproducible parametric-bootstrap procedure for the GPD excesses. Bootstrap uncertainty does **not** include threshold-selection uncertainty; for publication, sensitivity across a defensible threshold range should be reported separately. This is particularly important for non-stationary rainfall applications, where threshold choice can materially affect return-level estimates. citeturn0search4
+
+---
+
 ## Formal drought indices
 
 ### `spi`
@@ -267,10 +324,13 @@ significant = fdr_mask(trend["pvalue"], alpha=0.05)
 ## GEV
 
 ```python
-from climatevar.extremes import gev_fit, gev_return_level
+from climatevar.extremes import gev_fit, gev_return_level, gev_return_level_ci
 fit = gev_fit(annual_maxima)
 rl50 = gev_return_level(fit["shape"], fit["loc"], fit["scale"], 50)
+rl50_ci = gev_return_level_ci(annual_maxima, 50, n_resamples=2000, random_state=42)
 ```
+
+The GEV bootstrap interval is parametric: it treats the fitted GEV as the data-generating model and refits each bootstrap sample. Report the bootstrap size and random seed.
 
 ---
 
@@ -360,4 +420,4 @@ field = spatial_trend(ism)
 
 ## Research reproducibility checklist
 
-For publication-quality work, report dataset/version, domain, temporal aggregation, units, calendar, completeness rule, SPI/SPEI distribution and calibration period, PET method for SPEI, percentile baseline, event thresholds, spatial weighting, trend method, autocorrelation treatment, significance level, multiple-testing correction, and field-significance resampling design when used.
+For publication-quality work, report dataset/version, domain, temporal aggregation, units, calendar, completeness rule, SPI/SPEI distribution and calibration period, PET method for SPEI, percentile baseline, event thresholds, POT threshold-selection diagnostics, declustering rule, GPD parameterization, exceedance-rate units, return-period units, bootstrap method/size/seed, spatial weighting, trend method, autocorrelation treatment, significance level, multiple-testing correction, and field-significance resampling design when used.
