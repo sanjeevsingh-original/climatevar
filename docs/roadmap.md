@@ -24,9 +24,12 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Area-weighted regional trends
 - [x] Moving-block bootstrap field significance
 - [x] Formal SPI/SPEI foundation
-- [ ] Benchmark all trend methods against trusted reference implementations
+- [x] Benchmark classical MK, Sen slope and modified MK against independent reference calculations
 - [x] Add moving-block bootstrap confidence intervals for Sen slopes and regional trends
-- [ ] Add more explicit diagnostics for long-memory persistence
+- [x] Add DFA-based persistence/long-memory diagnostics
+
+### Phase 2 scientific status
+Trend methods now include independent numerical reference checks. Sen's slope uses the same pairwise-slope definition as SciPy's `theilslopes`. Modified MK remains explicitly documented as a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA is a persistence/scaling diagnostic and is not treated as a standalone hypothesis test for long-range dependence.
 
 ## Phase 3 — Publication-grade climate indices
 
