@@ -12,6 +12,7 @@ nav:
       - Trend analysis: trends.md
       - Precipitation verification: verification.md
       - Rainfall error tagging: error_tagging.md
+      - ML/DL error classification: ml_error_tagging.md
       - Extreme-value analysis: extremes.md
   - Project:
       - Scientific roadmap: roadmap.md
