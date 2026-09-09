@@ -3,7 +3,6 @@
 This roadmap prioritizes scientific correctness, reproducibility and research usefulness before API expansion.
 
 ## Phase 1 — Core research foundations
-
 - [x] xarray-first data model and package structure
 - [x] Climatology, anomalies and completeness diagnostics
 - [x] Precipitation indices and explicit unit handling
@@ -15,7 +14,6 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Automated tests and documentation workflow
 
 ## Phase 2 — Robust trend and drought analysis
-
 - [x] Classical Mann-Kendall and Sen slope
 - [x] Autocorrelation-aware modified Mann-Kendall
 - [x] Trend-free pre-whitening
@@ -24,15 +22,14 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Area-weighted regional trends
 - [x] Moving-block bootstrap field significance
 - [x] Formal SPI/SPEI foundation
-- [x] Benchmark classical MK, Sen slope and modified MK against independent reference calculations
-- [x] Add moving-block bootstrap confidence intervals for Sen slopes and regional trends
-- [ ] Add DFA-based persistence/long-memory diagnostics
+- [x] Independent numerical reference checks for trend methods
+- [x] Moving-block bootstrap confidence intervals for Sen slopes and regional trends
+- [x] DFA-based persistence/long-memory diagnostic
 
 ### Phase 2 scientific status
-Trend methods now include independent numerical reference checks. Sen's slope uses the pairwise-slope definition implemented by SciPy's `theilslopes`. Modified MK remains explicitly documented as a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA remains planned and is not claimed as a completed API feature.
+Trend methods include independent numerical reference checks. Sen's slope follows the pairwise-slope definition implemented by SciPy's `theilslopes`. Modified MK is explicitly a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA is available as a persistence/scaling diagnostic and should not be interpreted alone as proof of long-range dependence.
 
 ## Phase 3 — Publication-grade climate indices
-
 - [x] Calendar-aware ETCCDI-style precipitation definitions for core rainfall indices
 - [x] Wet-day threshold conventions and explicit annual completeness controls
 - [x] Fixed percentile baseline support with 1961–1990 as the ETCCDI default
@@ -46,28 +43,27 @@ Trend methods now include independent numerical reference checks. Sen's slope us
 - [ ] Add uncertainty and sensitivity options for percentile thresholds
 
 ### Phase 3 current focus
-The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Independent tests calculate expected values directly from the published definitions.
-
-The repository also contains an external RClimDex validation harness, but the current CI runner cannot install the legacy `PCICt`/`climdex.pcic` packages from current CRAN/R 4.6.1. Therefore this is retained as an optional external validation harness rather than a blocking release gate until a reproducible archived/containerized reference environment is added.
+The precipitation indices use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p calibration to 1961–1990, explicit completeness controls, CF time bounds where available, and safeguards against irregular sub-daily aggregation. The external RClimDex harness remains non-blocking because the legacy PCICt/climdex.pcic dependency cannot currently be installed reliably on the modern CI environment.
 
 ## Phase 4 — Extremes and uncertainty
-
 - [x] GPD/POT framework
 - [x] Parametric bootstrap confidence intervals for GEV return levels
-- [ ] Non-stationary extreme-value models
-- [x] Diagnostic plots/data and goodness-of-fit statistics
-- [x] Threshold-selection diagnostics
+- [x] POT threshold diagnostics: exceedance rate, mean excess and parameter stability
 - [x] Runs-based declustering for dependent exceedances
 - [x] Bootstrap confidence intervals for POT return levels
-- [x] Threshold sensitivity workflow
-- [ ] Formal calibrated goodness-of-fit inference with fitted-parameter bootstrap
-- [ ] Threshold-selection uncertainty propagated into final confidence intervals
+- [x] POT threshold sensitivity workflow
+- [x] Descriptive KS/Anderson-Darling and PIT/QQ diagnostics
+- [x] Fitted-parameter parametric-bootstrap calibration for POT goodness-of-fit statistics
+- [x] Empirical threshold-selection uncertainty envelope
+- [x] First non-stationary GPD model with covariate-dependent scale
+- [ ] Propagate threshold-selection uncertainty into formal probability intervals
+- [ ] Non-stationary GPD model comparison, covariate selection and robust inference
+- [ ] Publication-quality EVT plots and automated diagnostic reports
 
 ### Phase 4 current focus
-POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting, mean-excess and parameter-stability diagnostics, runs-based declustering, return levels, threshold sensitivity, descriptive KS/Anderson-Darling fit diagnostics, and reproducible parametric-bootstrap uncertainty. The API deliberately does not silently select a threshold. Formal calibrated goodness-of-fit inference, threshold-selection uncertainty, and non-stationary GPD models remain future work.
+POT now provides a diagnostic-first foundation: threshold exploration, GPD fitting, declustering, return levels, sampling uncertainty, calibrated bootstrap GOF diagnostics, threshold sensitivity, threshold-selection envelopes, and a conservative non-stationary scale model. The package does not silently select thresholds or present an empirical threshold envelope as a conventional confidence interval.
 
 ## Phase 5 — Dataset interoperability
-
 - [ ] Robust ERA5 / ERA5-Land adapters
 - [ ] IMERG/GPM product adapters
 - [ ] IMD/IMDAA station and gridded-data adapters
@@ -76,7 +72,6 @@ POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting
 - [ ] Metadata validation and provenance reporting
 
 ## Phase 6 — Model evaluation and rainfall error tagging
-
 - [ ] Bias, MAE, RMSE, correlation and NSE extensions
 - [ ] Event-based precipitation verification
 - [ ] Spatial and conditional error diagnostics
@@ -85,7 +80,6 @@ POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting
 - [ ] Explainable ML diagnostics for model rainfall errors
 
 ## Phase 7 — Research-scale computation
-
 - [ ] Dask-aware trend and bootstrap algorithms
 - [ ] Chunk-aware spatial statistics
 - [ ] Performance benchmarks for regional and continental grids
@@ -93,7 +87,6 @@ POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting
 - [ ] Optional accelerated numerical backends where justified
 
 ## Phase 8 — Scientific usability
-
 - [ ] Publication-quality plotting utilities
 - [ ] Reproducible worked examples for Indian Summer Monsoon research
 - [ ] Example workflows for Odisha precipitation extremes
@@ -102,7 +95,6 @@ POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting
 - [ ] Research-method reporting helpers
 
 ## Phase 9 — Stable release
-
 - [ ] API stability review
 - [ ] Deprecation and compatibility policy
 - [ ] Versioned documentation
@@ -112,14 +104,4 @@ POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting
 - [ ] Reproducible release benchmarks
 
 ## Scientific quality gate
-
-A feature should not be considered publication-ready merely because its numerical output looks plausible. Before a major method is promoted to a stable API, `climatevar` should have:
-
-1. an explicit mathematical/statistical definition;
-2. documented assumptions and limitations;
-3. synthetic-data tests with known behavior;
-4. comparison against an independent reference where available;
-5. clear treatment of missing data and calendars;
-6. reproducible random seeds for stochastic procedures;
-7. appropriate uncertainty or significance reporting; and
-8. documentation showing how the method should be reported in a scientific paper.
+Before a major method is promoted to a stable API, `climatevar` should have: (1) an explicit mathematical/statistical definition; (2) documented assumptions and limitations; (3) synthetic-data tests; (4) independent reference comparison where available; (5) clear missing-data and calendar treatment; (6) reproducible stochastic procedures; (7) appropriate uncertainty/significance reporting; and (8) documentation showing how the method should be reported scientifically.
