@@ -26,10 +26,10 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Formal SPI/SPEI foundation
 - [x] Benchmark classical MK, Sen slope and modified MK against independent reference calculations
 - [x] Add moving-block bootstrap confidence intervals for Sen slopes and regional trends
-- [x] Add DFA-based persistence/long-memory diagnostics
+- [ ] Add DFA-based persistence/long-memory diagnostics
 
 ### Phase 2 scientific status
-Trend methods now include independent numerical reference checks. Sen's slope uses the pairwise-slope definition implemented by SciPy's `theilslopes`. Modified MK remains explicitly documented as a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA is a persistence/scaling diagnostic and is not treated as a standalone hypothesis test for long-range dependence.
+Trend methods now include independent numerical reference checks. Sen's slope uses the pairwise-slope definition implemented by SciPy's `theilslopes`. Modified MK remains explicitly documented as a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA remains planned and is not claimed as a completed API feature.
 
 ## Phase 3 — Publication-grade climate indices
 
@@ -38,11 +38,15 @@ Trend methods now include independent numerical reference checks. Sen's slope us
 - [x] Fixed percentile baseline support with 1961–1990 as the ETCCDI default
 - [x] CF time bounds for precipitation accumulation where available
 - [x] Sub-daily-to-daily regular-sampling and coverage safeguards
-- [ ] Validate wet-day, percentile-baseline and completeness conventions against independent reference datasets
+- [x] Independent regression fixtures for core ETCCDI precipitation definitions
+- [x] Leap-year, no-leap and 360-day calendar validation
+- [x] Missing-day sensitivity and explicit completeness-threshold tests
+- [x] Cross-check against published RClimDex/ETCCDI definitions and threshold conventions
+- [ ] Validate against external RClimDex/Climpact numerical output files
 - [ ] Add uncertainty and sensitivity options for percentile thresholds
 
 ### Phase 3 current focus
-The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Explicit reference thresholds remain available for reproducible experiments and non-standard baselines.
+The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Independent tests calculate expected values directly from the published definitions rather than reusing `climatevar` internals. Calendar tests cover Gregorian leap years, no-leap years and 360-day calendars when `cftime` is available.
 
 ## Phase 4 — Extremes and uncertainty
 
@@ -84,7 +88,7 @@ The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry
 - [ ] Reproducible worked examples for Indian Summer Monsoon research
 - [ ] Example workflows for Odisha precipitation extremes
 - [ ] Notebook suite covering ERA5, IMERG, IMDAA, WRF and CMIP6
-- [ ] Validation fixtures and expected-value regression datasets
+- [x] Validation fixtures and expected-value regression datasets for core precipitation indices
 - [ ] Research-method reporting helpers
 
 ## Phase 9 — Stable release
