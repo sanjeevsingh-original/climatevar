@@ -1,5 +1,7 @@
 import numpy as np
+import pytest
 
+pytest.importorskip("sklearn")
 from climatevar.error_tagging import classification_metrics, cross_validate_classifier, make_classifier
 
 
