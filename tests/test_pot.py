@@ -1,12 +1,15 @@
 import numpy as np
 import xarray as xr
+import pytest
 
 from climatevar.extremes import (
     decluster_exceedances,
     gpd_fit,
+    gpd_goodness_of_fit,
     pot_exceedances,
     pot_return_level,
     pot_return_level_ci,
+    pot_threshold_sensitivity,
     threshold_diagnostics,
 )
 
@@ -33,7 +36,32 @@ def test_threshold_diagnostics_and_return_level():
     assert list(diag.threshold.values) == [15, 20, 25, 30]
     assert np.all(diag.n_exceedances.values[:-1] >= diag.n_exceedances.values[1:])
     assert np.all(np.isfinite(diag.shape.values))
+    assert np.all(np.isfinite(diag.mean_excess.values))
     assert pot_return_level(20, 0.1, 10, 0.05, 100) > 20
+    assert np.isnan(pot_return_level(20, 0.1, 10, 0.05, 10))
+
+
+def test_threshold_sensitivity():
+    rng = np.random.default_rng(42)
+    data = xr.DataArray(rng.gamma(2.0, 10.0, 2000), dims="time")
+    out = pot_threshold_sensitivity(data, [15, 20, 25, 30], 100)
+    assert "return_level" in out
+    assert np.all(np.isfinite(out.mean_excess.values))
+
+
+def test_gpd_goodness_of_fit_outputs_diagnostics():
+    rng = np.random.default_rng(3)
+    data = xr.DataArray(rng.exponential(10.0, 500), dims="time")
+    out = gpd_goodness_of_fit(data)
+    assert out.n_exceedances.item() == 500
+    assert np.isfinite(out.ks_statistic.item())
+    assert out.pit.size == 500
+    assert out.qq_observed.size == 500
+
+
+def test_invalid_short_return_period():
+    with pytest.raises(ValueError):
+        pot_return_level_ci(xr.DataArray(np.arange(100.0), dims="time"), 50, 1)
 
 
 def test_pot_bootstrap_is_reproducible():
