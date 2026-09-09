@@ -1,9 +1,4 @@
-"""Dataset-family adapters for comparative precipitation verification.
-
-Adapters intentionally separate *dataset identification* from scientific
-normalization. Variable names may be overridden because provider files vary by
-version and distribution.
-"""
+"""Dataset-family adapters for comparative precipitation verification."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,8 +8,7 @@ from typing import Mapping
 import xarray as xr
 
 from climatevar.precipitation.normalize import normalize_precipitation
-from climatevar.precipitation.wrf import wrf_total_precipitation
-
+from climatevar.precipitation.wrf import wrf_precipitation_amount
 
 PRESETS: dict[str, dict[str, tuple[str, ...]]] = {
     "era5": {"precipitation": ("tp", "total_precipitation", "precip")},
@@ -30,15 +24,14 @@ PRESETS: dict[str, dict[str, tuple[str, ...]]] = {
 
 def _family(name: str) -> str:
     key = name.lower().strip().replace("_", "-")
-    aliases = {"era5land": "era5-land", "gpm-imerg": "imerg"}
-    return aliases.get(key, key)
+    return {"era5land": "era5-land", "gpm-imerg": "imerg"}.get(key, key)
 
 
 def _open(source, **kwargs):
     if isinstance(source, xr.Dataset):
         return source
     path = Path(source)
-    if path.suffix.lower() in {".zarr"} or path.is_dir():
+    if path.suffix.lower() == ".zarr" or path.is_dir():
         return xr.open_zarr(source, **kwargs)
     return xr.open_dataset(source, **kwargs)
 
@@ -48,14 +41,10 @@ def _pick_variable(ds: xr.Dataset, family: str, variable: str | None) -> str:
         if variable not in ds:
             raise KeyError(f"Variable {variable!r} is not present in the dataset.")
         return variable
-    candidates = PRESETS.get(family, {}).get("precipitation", ())
-    for candidate in candidates:
+    for candidate in PRESETS.get(family, {}).get("precipitation", ()):
         if candidate in ds:
             return candidate
-    raise KeyError(
-        f"Could not identify precipitation variable for {family!r}. "
-        f"Pass variable=... explicitly. Available variables: {list(ds.data_vars)}"
-    )
+    raise KeyError(f"Could not identify precipitation variable for {family!r}; pass variable=... explicitly. Available variables: {list(ds.data_vars)}")
 
 
 def _rename_spatial(data: xr.DataArray) -> xr.DataArray:
@@ -73,28 +62,33 @@ def _rename_spatial(data: xr.DataArray) -> xr.DataArray:
     return data
 
 
-def load_precipitation(
-    source,
-    *,
-    family: str,
-    variable: str | None = None,
-    dim: str = "time",
-    normalize: bool = True,
-    chunks=None,
-    open_kwargs: Mapping | None = None,
-) -> xr.DataArray:
+def _attach_wrf_latlon(data: xr.DataArray, ds: xr.Dataset) -> xr.DataArray:
+    if "XLAT" in ds and "XLONG" in ds:
+        lat = ds["XLAT"]
+        lon = ds["XLONG"]
+        if "Time" in lat.dims:
+            lat, lon = lat.isel(Time=0), lon.isel(Time=0)
+        data = data.assign_coords(lat=lat, lon=lon)
+    return data
+
+
+def load_precipitation(source, *, family: str, variable: str | None = None, dim: str = "time", normalize: bool = True, chunks=None, open_kwargs: Mapping | None = None) -> xr.DataArray:
     """Load one precipitation product using a dataset-family preset.
 
-    The returned field is standardized to ``time, lat, lon`` naming where
-    possible. ``normalize=True`` converts native precipitation rates/amounts
-    to climatevar's analysis-ready interval representation.
+    Standard rectilinear products expose ``time, lat, lon``. WRF curvilinear
+    files may instead expose 2-D ``lat``/``lon`` coordinates on the native
+    south_north/west_east grid; these should be regridded before verification.
     """
     family = _family(family)
     ds = _open(source, chunks=chunks, **(dict(open_kwargs or {})))
     if family == "wrf":
         if not {"RAINC", "RAINNC"}.issubset(ds.data_vars):
             raise KeyError("WRF input must contain RAINC and RAINNC for total precipitation.")
-        data = wrf_total_precipitation(ds)
+        wrf_dim = "Time" if "Time" in ds.dims else "time"
+        data = wrf_precipitation_amount(ds, dim=wrf_dim)
+        data = _attach_wrf_latlon(data, ds)
+        if "Time" in data.dims:
+            data = data.rename({"Time": "time"})
     else:
         name = _pick_variable(ds, family, variable)
         data = ds[name]
@@ -107,8 +101,8 @@ def load_precipitation(
     data = _rename_spatial(data)
     if "time" not in data.dims:
         raise ValueError("Precipitation data must have a time dimension.")
-    if not {"lat", "lon"}.issubset(data.dims):
-        raise ValueError("Precipitation data must expose 1-D lat/lon dimensions after loading.")
+    if "lat" not in data.coords or "lon" not in data.coords:
+        raise ValueError("Precipitation data must expose lat/lon coordinates.")
     data.name = variable or f"{family}_precipitation"
     data.attrs["climatevar:dataset_family"] = family
     return data
@@ -117,7 +111,6 @@ def load_precipitation(
 @dataclass(frozen=True)
 class ProductSpec:
     """Specification for one precipitation product."""
-
     name: str
     family: str
     source: object
@@ -126,11 +119,4 @@ class ProductSpec:
     open_kwargs: Mapping | None = None
 
     def load(self, *, normalize: bool = True) -> xr.DataArray:
-        return load_precipitation(
-            self.source,
-            family=self.family,
-            variable=self.variable,
-            chunks=self.chunks,
-            normalize=normalize,
-            open_kwargs=self.open_kwargs,
-        )
+        return load_precipitation(self.source, family=self.family, variable=self.variable, chunks=self.chunks, normalize=normalize, open_kwargs=self.open_kwargs)
