@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 
 from climatevar.metrics import bias, correlation, mae, rmse
-from climatevar.metrics.precipitation import contingency_table, f1_score, heidke_skill_score, pod, far
+from climatevar.metrics.precipitation import f1_score, heidke_skill_score, pod, far
 from climatevar.metrics.precipitation_verification import bias_ratio, equitable_threat_score, frequency_bias, threat_score
 
 
@@ -36,14 +36,12 @@ def evaluate_product(reference, candidate, *, name="candidate", threshold=1.0):
     out = {
         "dataset": name,
         "n_valid": int(ref.count().values),
-        "bias": float(bias(pred, ref).mean()),
-        "mae": float(mae(pred, ref).mean()),
-        "rmse": float(rmse(pred, ref).mean()),
-        "correlation": float(correlation(pred, ref, dim="time").mean()),
-        "bias_ratio": float(bias_ratio(pred, ref, dim=reduce_dims)),
+        "bias": float(bias(ref, pred).mean()),
+        "mae": float(mae(ref, pred).mean()),
+        "rmse": float(rmse(ref, pred).mean()),
+        "correlation": float(correlation(ref, pred, dim="time").mean()),
+        "bias_ratio": float(bias_ratio(ref, pred, dim=reduce_dims)),
     }
-    obs_event, pred_event = ref >= threshold, pred >= threshold
-    table = contingency_table(ref, pred, threshold=threshold, dim=reduce_dims)
     out.update({
         "pod": float(pod(ref, pred, threshold=threshold, dim=reduce_dims)),
         "far": float(far(ref, pred, threshold=threshold, dim=reduce_dims)),
