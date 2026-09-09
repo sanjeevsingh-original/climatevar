@@ -29,15 +29,18 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Add DFA-based persistence/long-memory diagnostics
 
 ### Phase 2 scientific status
-Trend methods now include independent numerical reference checks. Sen's slope uses the same pairwise-slope definition as SciPy's `theilslopes`. Modified MK remains explicitly documented as a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA is a persistence/scaling diagnostic and is not treated as a standalone hypothesis test for long-range dependence.
+Trend methods now include independent numerical reference checks. Sen's slope uses the pairwise-slope definition implemented by SciPy's `theilslopes`. Modified MK remains explicitly documented as a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA is a persistence/scaling diagnostic and is not treated as a standalone hypothesis test for long-range dependence.
 
 ## Phase 3 — Publication-grade climate indices
 
 - [ ] Complete calendar-aware ETCCDI-style definitions
 - [ ] Validate wet-day, percentile-baseline and completeness conventions against reference datasets
-- [ ] Use CF time bounds consistently for precipitation accumulation where available
+- [x] Use CF time bounds consistently for precipitation accumulation where available
 - [ ] Expand sub-daily-to-daily aggregation safeguards
 - [ ] Add uncertainty and sensitivity options for percentile thresholds
+
+### Phase 3 current focus
+CF-style time bounds are now preferred when supplied through the dataset or as a `time_bnds` coordinate on a DataArray. Timestamp spacing remains the fallback. This distinction is important for accumulated/rate precipitation because the valid interval can differ from the distance between timestamps.
 
 ## Phase 4 — Extremes and uncertainty
 
