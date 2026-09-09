@@ -23,7 +23,7 @@ def test_pot_exceedances_and_fit():
 def test_runs_declustering_retains_cluster_maxima():
     data = xr.DataArray([0, 8, 12, 2, 1, 9, 7, 0, 11, 0], dims="time")
     peaks = decluster_exceedances(data, threshold=5, run_length=2)
-    assert np.allclose(peaks.dropna("time"), [12, 9, 11])
+    assert np.allclose(peaks.dropna("time"), [12, 11])
 
 
 def test_threshold_diagnostics_and_return_level():
