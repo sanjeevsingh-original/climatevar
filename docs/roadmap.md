@@ -26,9 +26,6 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Moving-block bootstrap confidence intervals for Sen slopes and regional trends
 - [x] DFA-based persistence/long-memory diagnostic
 
-### Phase 2 scientific status
-Trend methods include independent numerical reference checks. Sen's slope follows the pairwise-slope definition implemented by SciPy's `theilslopes`. Modified MK is explicitly a Yue-Wang-style effective-sample-size correction rather than a Hamed-Rao implementation. DFA is available as a persistence/scaling diagnostic and should not be interpreted alone as proof of long-range dependence.
-
 ## Phase 3 — Publication-grade climate indices
 - [x] Calendar-aware ETCCDI-style precipitation definitions for core rainfall indices
 - [x] Wet-day threshold conventions and explicit annual completeness controls
@@ -42,32 +39,17 @@ Trend methods include independent numerical reference checks. Sen's slope follow
 - [ ] Validate against external RClimDex/Climpact numerical output files
 - [ ] Add uncertainty and sensitivity options for percentile thresholds
 
-### Phase 3 current focus
-The precipitation indices use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p calibration to 1961–1990, explicit completeness controls, CF time bounds where available, and safeguards against irregular sub-daily aggregation. The external RClimDex harness remains non-blocking because the legacy PCICt/climdex.pcic dependency cannot currently be installed reliably on the modern CI environment.
-
 ## Phase 4 — Extremes and uncertainty
 - [x] GPD/POT framework
 - [x] Parametric bootstrap confidence intervals for GEV return levels
-- [x] POT threshold diagnostics: exceedance rate, mean excess and parameter stability
-- [x] Runs-based declustering for dependent exceedances
-- [x] Bootstrap confidence intervals for POT return levels
-- [x] POT threshold sensitivity workflow
-- [x] Descriptive KS/Anderson-Darling and PIT/QQ diagnostics
-- [x] Fitted-parameter parametric-bootstrap calibration for POT goodness-of-fit statistics
-- [x] Empirical threshold-selection uncertainty envelope
-- [x] Bootstrap propagation through an explicit AIC threshold-selection rule
-- [x] First non-stationary GPD model with covariate-dependent scale
-- [x] Stationary vs non-stationary GPD comparison with AIC/BIC and LR diagnostics
-- [x] Parametric-bootstrap LR inference for non-stationarity
-- [x] Bootstrap parameter intervals for non-stationary GPD
-- [x] Publication-quality EVT plotting utilities
-- [x] Automated HTML POT diagnostic reports
+- [x] POT threshold diagnostics and sensitivity
+- [x] Runs-based declustering
+- [x] Bootstrap confidence intervals and bootstrap GOF calibration
+- [x] Non-stationary GPD and model-comparison diagnostics
+- [x] Publication-quality EVT plotting and diagnostic reports
 - [ ] Formal Bayesian/model-averaged threshold-selection uncertainty
 - [ ] Robust non-stationary model comparison across multiple covariates and dependence structures
 - [ ] External independent EVT reference validation
-
-### Phase 4 current focus
-POT now provides threshold exploration, GPD fitting, declustering, return levels, sampling uncertainty, calibrated bootstrap GOF diagnostics, threshold sensitivity, bootstrap propagation through an explicit threshold-selection rule, and conservative non-stationary inference. Advanced results remain conditional on the documented candidate thresholds, selection rule, covariates and stochastic assumptions.
 
 ## Phase 5 — Dataset interoperability
 - [ ] Robust ERA5 / ERA5-Land adapters
@@ -83,17 +65,14 @@ POT now provides threshold exploration, GPD fitting, declustering, return levels
 - [x] Spatial and conditional error diagnostics
 - [x] Error decomposition by intensity, season and synoptic-ready feature hooks
 - [x] ML/DL-ready rainfall error-tagging datasets
-- [x] Baseline Random Forest and histogram gradient-boosting classifiers
-- [x] Optional XGBoost classifier interface
-- [x] Class-imbalance-aware training and calibrated probabilities
-- [x] Time-, group- and spatial-block-aware evaluation
-- [x] Validation-set permutation importance
-- [x] Optional TreeSHAP explanations
+- [x] Random Forest / histogram-gradient-boosting baselines and optional XGBoost
+- [x] Class-imbalance-aware training, probability calibration and leakage-aware CV
+- [x] Comparative ERA5/IMERG/IMDAA/WRF/CMIP6 scorecard and transparent ranking
 - [ ] Calibrated model-specific error-class thresholds and sensitivity analysis
 - [ ] Deep CNN/ConvLSTM/Transformer rainfall-error classifier
 
 ### Phase 6 current focus
-`climatevar.error_tagging` now separates post-hoc diagnostic error tagging from prospective error prediction, provides configurable rainfall-intensity and error classes, preserves traceable verification features, and provides chronological, event-group and spatial-block split utilities. Optional ML tooling provides reproducible Random Forest and histogram-gradient-boosting baselines, optional XGBoost, class-balanced training, probability calibration, leakage-aware cross-validation, permutation importance and TreeSHAP. Deep neural models remain deliberately deferred until the tabular benchmark and evaluation protocol are established.
+`climatevar.verification` now provides a common-grid baseline, exact common-period alignment, deterministic and categorical scorecards, multi-product comparison and transparent weighted ranking. This is intended as the evaluation layer beneath rainfall error tagging. Published Indian-region assessments show that product performance varies with region, topography and rainfall intensity, supporting conditional rather than universal rankings. The next step is to connect real dataset adapters and build publication-ready spatial/seasonal/intensity reports.
 
 ## Phase 7 — Research-scale computation
 - [ ] Dask-aware trend and bootstrap algorithms
