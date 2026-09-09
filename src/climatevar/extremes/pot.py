@@ -110,8 +110,6 @@ def _return_level(shape, scale, threshold, rate, return_period):
     if return_period <= 0 or rate <= 0 or scale <= 0:
         return np.nan
     target = rate * return_period
-    # Standard POT return levels above the threshold require a return period
-    # longer than the mean recurrence interval of threshold exceedances.
     if target <= 1:
         return np.nan
     if shape < 0 and target ** shape >= 1:
@@ -123,13 +121,17 @@ def _return_level(shape, scale, threshold, rate, return_period):
 
 def pot_return_level(threshold: float, shape: float, scale: float,
                      exceedance_rate: float, return_period: float) -> float:
-    """Return level for a stationary POT model.
-
-    ``exceedance_rate`` and ``return_period`` must use the same observation
-    unit. The return period must exceed the threshold exceedance recurrence
-    interval so the reported level is above the threshold.
-    """
-    return float(_return_level(shape, scale, threshold, exceedance_rate, return_period))
+    """Return level for a stationary POT model."""
+    if not np.isfinite(exceedance_rate) or exceedance_rate <= 0:
+        raise ValueError("exceedance_rate must be positive and finite.")
+    if not np.isfinite(return_period) or return_period <= 0:
+        raise ValueError("return_period must be positive and finite.")
+    if exceedance_rate * return_period <= 1:
+        raise ValueError("return_period must exceed the threshold-exceedance recurrence interval.")
+    level = _return_level(shape, scale, threshold, exceedance_rate, return_period)
+    if not np.isfinite(level):
+        raise ValueError("The requested return level is outside the fitted GPD support.")
+    return float(level)
 
 
 def pot_return_level_ci(data: xr.DataArray, threshold: float, return_period: float,
@@ -141,8 +143,8 @@ def pot_return_level_ci(data: xr.DataArray, threshold: float, return_period: flo
         raise ValueError("alpha must be between 0 and 1.")
     if n_resamples < 100:
         raise ValueError("n_resamples must be at least 100.")
-    if return_period <= 0:
-        raise ValueError("return_period must be positive.")
+    if not np.isfinite(return_period) or return_period <= 0:
+        raise ValueError("return_period must be positive and finite.")
     if dim not in data.dims:
         raise ValueError(f"Dimension {dim!r} is not present in the input data.")
     y = np.asarray(data.values, dtype=float)
@@ -161,6 +163,8 @@ def pot_return_level_ci(data: xr.DataArray, threshold: float, return_period: flo
                            "exceedance_rate": np.nan})
     shape, scale, n_exc = _fit_gpd_1d(excess)
     rate = n_exc / n_obs
+    if rate * return_period <= 1:
+        raise ValueError("return_period must exceed the threshold-exceedance recurrence interval.")
     observed = _return_level(shape, scale, threshold, rate, return_period)
     rng = np.random.default_rng(random_state)
     levels = np.full(n_resamples, np.nan)
@@ -180,14 +184,9 @@ def pot_return_level_ci(data: xr.DataArray, threshold: float, return_period: flo
 
 def pot_threshold_sensitivity(data: xr.DataArray, thresholds, return_period: float,
                               dim: str = "time") -> xr.Dataset:
-    """Evaluate POT parameters and return level across candidate thresholds.
-
-    This is a sensitivity analysis, not an automatic threshold selector. Stable
-    parameter estimates and a defensible mean-residual-life region should be
-    assessed before choosing a threshold.
-    """
-    if return_period <= 0:
-        raise ValueError("return_period must be positive.")
+    """Evaluate POT parameters and return level across candidate thresholds."""
+    if not np.isfinite(return_period) or return_period <= 0:
+        raise ValueError("return_period must be positive and finite.")
     thresholds = np.asarray(thresholds, dtype=float)
     if thresholds.ndim != 1 or thresholds.size == 0 or np.any(~np.isfinite(thresholds)):
         raise ValueError("thresholds must be a non-empty one-dimensional finite sequence.")
@@ -201,11 +200,10 @@ def pot_threshold_sensitivity(data: xr.DataArray, thresholds, return_period: flo
 
 
 def gpd_goodness_of_fit(excesses: xr.DataArray, dim: str = "time") -> xr.Dataset:
-    """Return PIT/QQ/PP diagnostics and KS/AD statistics for a fitted GPD.
+    """Return PIT/QQ/PP diagnostics and descriptive KS/AD statistics.
 
-    The tests are descriptive diagnostics: because GPD parameters are estimated
-    from the same sample, their p-values are not treated as exact null p-values.
-    Use bootstrap or simulation for formal calibrated inference.
+    Since GPD parameters are estimated from the same sample, test p-values are
+    descriptive only. Calibrated inference requires parametric bootstrap/simulation.
     """
     from scipy.stats import anderson, genpareto, kstest
     if dim not in excesses.dims:
@@ -217,9 +215,6 @@ def gpd_goodness_of_fit(excesses: xr.DataArray, dim: str = "time") -> xr.Dataset
     shape, scale, _ = _fit_gpd_1d(y)
     pit = genpareto.cdf(y, shape, loc=0, scale=scale)
     ks = kstest(pit, "uniform")
-    # Anderson-Darling is computed on the PIT sample; scipy's uniform option
-    # is not available on all supported SciPy versions, so use the equivalent
-    # exponential transform for the AD diagnostic.
     z = -np.log(np.clip(1.0 - pit, np.finfo(float).eps, 1.0))
     ad = anderson(z, dist="expon")
     order = np.sort(y)
