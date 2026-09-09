@@ -1,5 +1,6 @@
 """Grid conventions and safe spatial normalization."""
 from __future__ import annotations
+import numpy as np
 import xarray as xr
 
 def normalize_longitude(data: xr.Dataset | xr.DataArray, *, target: str = "-180_180"):
