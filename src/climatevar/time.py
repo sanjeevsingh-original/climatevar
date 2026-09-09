@@ -75,8 +75,10 @@ def expected_days(data, dim="time"):
     return xr.DataArray(values, coords={"year": unique}, dims="year", name="expected_days")
 
 def year_complete_mask(data, dim="time", *, min_valid_fraction=0.9):
-    if not 0 < min_valid_fraction <= 1: raise ValueError("min_valid_fraction must be greater than 0 and at most 1.")
+    if not 0 <= min_valid_fraction <= 1: raise ValueError("min_valid_fraction must be between 0 and 1.")
     valid = data.notnull().groupby(f"{dim}.year").sum(dim=dim)
+    if min_valid_fraction == 0:
+        return xr.ones_like(valid, dtype=bool)
     expected = expected_days(data, dim).reindex(year=valid["year"])
     return (valid / expected) >= min_valid_fraction
 
