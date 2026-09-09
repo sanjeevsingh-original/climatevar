@@ -33,14 +33,16 @@ Trend methods now include independent numerical reference checks. Sen's slope us
 
 ## Phase 3 — Publication-grade climate indices
 
-- [ ] Complete calendar-aware ETCCDI-style definitions
-- [ ] Validate wet-day, percentile-baseline and completeness conventions against reference datasets
-- [x] Use CF time bounds consistently for precipitation accumulation where available
-- [ ] Expand sub-daily-to-daily aggregation safeguards
+- [x] Calendar-aware ETCCDI-style precipitation definitions for core rainfall indices
+- [x] Wet-day threshold conventions and explicit annual completeness controls
+- [x] Fixed percentile baseline support with 1961–1990 as the ETCCDI default
+- [x] CF time bounds for precipitation accumulation where available
+- [x] Sub-daily-to-daily regular-sampling and coverage safeguards
+- [ ] Validate wet-day, percentile-baseline and completeness conventions against independent reference datasets
 - [ ] Add uncertainty and sensitivity options for percentile thresholds
 
 ### Phase 3 current focus
-CF-style time bounds are now preferred when supplied through the dataset or as a `time_bnds` coordinate on a DataArray. Timestamp spacing remains the fallback. This distinction is important for accumulated/rate precipitation because the valid interval can differ from the distance between timestamps.
+The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Explicit reference thresholds remain available for reproducible experiments and non-standard baselines.
 
 ## Phase 4 — Extremes and uncertainty
 
