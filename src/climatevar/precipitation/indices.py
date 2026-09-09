@@ -68,28 +68,35 @@ def _reference_mm(reference):
     if units not in factors: raise ValueError("Percentile reference must use mm, cm, or m.")
     out = reference * factors[units]; out.attrs = dict(reference.attrs); out.attrs["units"] = "mm"; return out
 
-def _percentile_total(data, reference, percentile, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction):
+def _percentile_total(data, reference, percentile, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction, quantile_method):
     data = _validate_daily(data, dim, min_daily_valid_fraction=min_daily_valid_fraction)
     if not 0 <= percentile <= 1: raise ValueError("percentile must be between 0 and 1.")
     wet_day_threshold = _validate_threshold(wet_day_threshold, "wet_day_threshold"); complete = _complete_year_mask(data, dim, min_valid_fraction)
     if reference is not None: threshold = _reference_mm(reference)
     else:
-        baseline = data.sel({dim: slice(baseline_start, baseline_end)}); threshold = baseline.where(baseline >= wet_day_threshold).quantile(percentile, dim=dim, skipna=True)
-    result = data.where(data > threshold).groupby(f"{dim}.year").sum(dim=dim, skipna=True); result.attrs["climatevar:percentile_baseline"] = "explicit_reference" if reference is not None else f"{baseline_start}:{baseline_end}"; result.attrs["climatevar:wet_day_threshold_mm"] = wet_day_threshold
+        baseline = data.sel({dim: slice(baseline_start, baseline_end)})
+        wet = baseline.where(baseline >= wet_day_threshold)
+        threshold = wet.quantile(percentile, dim=dim, skipna=True, method=quantile_method)
+    result = data.where(data > threshold).groupby(f"{dim}.year").sum(dim=dim, skipna=True)
+    result.attrs["climatevar:percentile_baseline"] = "explicit_reference" if reference is not None else f"{baseline_start}:{baseline_end}"
+    result.attrs["climatevar:wet_day_threshold_mm"] = wet_day_threshold
+    result.attrs["climatevar:quantile_method"] = quantile_method
     return _with_mm_units(result.where(complete))
 
-def r95p(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9):
-    return _percentile_total(data, reference, 0.95, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction)
+def r95p(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9, quantile_method="median_unbiased"):
+    """Annual precipitation above the RClimDex 95th wet-day percentile."""
+    return _percentile_total(data, reference, 0.95, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction, quantile_method)
 
-def r99p(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9):
-    return _percentile_total(data, reference, 0.99, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction)
+def r99p(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9, quantile_method="median_unbiased"):
+    """Annual precipitation above the RClimDex 99th wet-day percentile."""
+    return _percentile_total(data, reference, 0.99, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction, quantile_method)
 
-def r95p_fraction(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9):
-    numerator = r95p(data, reference, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction); denominator = prcptot(data, dim, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction)
+def r95p_fraction(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9, quantile_method="median_unbiased"):
+    numerator = r95p(data, reference, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction, quantile_method=quantile_method); denominator = prcptot(data, dim, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction)
     result = 100 * numerator / denominator; result.attrs.update({"units": "%", "climatevar:definition": "100 * R95p / PRCPTOT"}); return result
 
-def r99p_fraction(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9):
-    numerator = r99p(data, reference, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction); denominator = prcptot(data, dim, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction)
+def r99p_fraction(data, reference=None, dim="time", baseline_start="1961-01-01", baseline_end="1990-12-31", wet_day_threshold=1.0, min_valid_fraction=0.9, *, min_daily_valid_fraction=0.9, quantile_method="median_unbiased"):
+    numerator = r99p(data, reference, dim, baseline_start, baseline_end, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction, quantile_method=quantile_method); denominator = prcptot(data, dim, wet_day_threshold, min_valid_fraction, min_daily_valid_fraction=min_daily_valid_fraction)
     result = 100 * numerator / denominator; result.attrs.update({"units": "%", "climatevar:definition": "100 * R99p / PRCPTOT"}); return result
 
 def _max_consecutive_1d(values):
