@@ -52,20 +52,17 @@ def make_classifier(model="hist_gradient_boosting", random_state=0, class_weight
 
 
 def fit_classifier(X, y, model="hist_gradient_boosting", calibrate=False,
-                   random_state=0, **kwargs):
-    """Fit a baseline classifier; calibration is performed after the model is specified."""
+                   random_state=0, calibration_cv=3, **kwargs):
+    """Fit a baseline classifier with optional sigmoid probability calibration."""
     estimator = make_classifier(model=model, random_state=random_state, **kwargs)
     if calibrate:
         _, _, CalibratedClassifierCV, *_ = _sklearn()
-        try:
-            estimator = CalibratedClassifierCV(estimator, method="sigmoid", cv=3)
-        except TypeError:
-            estimator = CalibratedClassifierCV(estimator, method="sigmoid", cv=3)
+        estimator = CalibratedClassifierCV(estimator, method="sigmoid", cv=calibration_cv)
     estimator.fit(X, y)
     return estimator
 
 
-def classification_metrics(y_true, y_pred, probability=None):
+def classification_metrics(y_true, y_pred, probability=None, labels=None):
     """Return class-imbalance-aware diagnostic metrics."""
     _, _, _, accuracy, balanced_accuracy, f1, log_loss, mcc, precision, recall, auc = _sklearn()
     out = {
@@ -79,9 +76,10 @@ def classification_metrics(y_true, y_pred, probability=None):
     }
     if probability is not None:
         p = np.asarray(probability)
-        out["log_loss"] = float(log_loss(y_true, p, labels=np.unique(y_true)))
+        classes = np.asarray(labels if labels is not None else np.unique(y_true))
+        out["log_loss"] = float(log_loss(y_true, p, labels=classes))
         try:
-            out["roc_auc_ovr_macro"] = float(auc(y_true, p, multi_class="ovr", average="macro"))
+            out["roc_auc_ovr_macro"] = float(auc(y_true, p, labels=classes, multi_class="ovr", average="macro"))
         except ValueError:
             out["roc_auc_ovr_macro"] = float("nan")
     return out
