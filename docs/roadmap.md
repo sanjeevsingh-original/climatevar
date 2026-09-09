@@ -78,12 +78,16 @@ POT now provides threshold exploration, GPD fitting, declustering, return levels
 - [ ] Metadata validation and provenance reporting
 
 ## Phase 6 — Model evaluation and rainfall error tagging
-- [ ] Bias, MAE, RMSE, correlation and NSE extensions
-- [ ] Event-based precipitation verification
-- [ ] Spatial and conditional error diagnostics
-- [ ] Error decomposition by intensity, season and synoptic regime
-- [ ] ML/DL-ready rainfall error-tagging datasets
+- [x] Bias, MAE, RMSE, correlation and NSE extensions
+- [x] Event-based precipitation verification
+- [x] Spatial and conditional error diagnostics
+- [x] Error decomposition by intensity, season and synoptic-ready feature hooks
+- [x] ML/DL-ready rainfall error-tagging datasets
 - [ ] Explainable ML diagnostics for model rainfall errors
+- [ ] Calibrated model-specific error-class thresholds and sensitivity analysis
+
+### Phase 6 current focus
+`climatevar.error_tagging` now separates post-hoc diagnostic error tagging from prospective error prediction, provides configurable rainfall-intensity and error classes, preserves traceable verification features, and provides chronological, event-group and spatial-block split utilities. Random row-wise splitting should not be used as the default for autocorrelated rainfall data. The next scientific step is model fitting and explainability without introducing truth leakage.
 
 ## Phase 7 — Research-scale computation
 - [ ] Dask-aware trend and bootstrap algorithms
