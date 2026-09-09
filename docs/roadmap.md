@@ -52,14 +52,16 @@ The repository also contains an external RClimDex validation harness, but the cu
 
 ## Phase 4 — Extremes and uncertainty
 
-- [ ] GPD/POT framework
+- [x] GPD/POT framework
 - [x] Parametric bootstrap confidence intervals for GEV return levels
 - [ ] Non-stationary extreme-value models
 - [ ] Diagnostic plots and goodness-of-fit tests
-- [ ] Threshold-selection diagnostics
+- [x] Threshold-selection diagnostics
+- [x] Runs-based declustering for dependent exceedances
+- [x] Bootstrap confidence intervals for POT return levels
 
 ### Phase 4 current focus
-GEV fitting and return levels are available, and `gev_return_level_ci` now provides reproducible parametric-bootstrap uncertainty intervals. GPD/POT remains the next major extreme-value capability.
+GEV fitting and return levels are available, with reproducible parametric-bootstrap uncertainty intervals. POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting, threshold stability diagnostics, runs-based declustering, return levels and reproducible parametric-bootstrap uncertainty. Threshold-selection uncertainty and formal goodness-of-fit diagnostics remain open work; these should be developed before treating POT as a fully automated publication workflow.
 
 ## Phase 5 — Dataset interoperability
 
