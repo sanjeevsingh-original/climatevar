@@ -52,12 +52,14 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [ ] External independent EVT reference validation
 
 ## Phase 5 — Dataset interoperability
-- [ ] Robust ERA5 / ERA5-Land adapters
-- [ ] IMERG/GPM product adapters
-- [ ] IMD/IMDAA station and gridded-data adapters
-- [ ] CMIP6 calendar and ensemble utilities
-- [ ] WRF precipitation and diagnostic adapters
-- [ ] Metadata validation and provenance reporting
+- [x] Robust ERA5 / ERA5-Land adapters
+- [x] IMERG/GPM product adapters
+- [x] IMD/IMDAA gridded-data adapters
+- [x] CMIP6 precipitation variable and calendar-compatible loading foundation
+- [x] WRF precipitation adapter using cumulative-component differencing and restart handling
+- [x] Metadata validation and explicit variable override/provenance fields
+- [ ] Station-level IMD ingestion and station-to-grid matchup utilities
+- [ ] Full CF cell-bound/bounds validation for conservative regridding
 
 ## Phase 6 — Model evaluation and rainfall error tagging
 - [x] Bias, MAE, RMSE, correlation and NSE extensions
@@ -68,11 +70,12 @@ This roadmap prioritizes scientific correctness, reproducibility and research us
 - [x] Random Forest / histogram-gradient-boosting baselines and optional XGBoost
 - [x] Class-imbalance-aware training, probability calibration and leakage-aware CV
 - [x] Comparative ERA5/IMERG/IMDAA/WRF/CMIP6 scorecard and transparent ranking
+- [x] Automated multi-product experiment runner with seasonal/intensity scorecards, spatial NetCDF fields and ML-ready error outputs
 - [ ] Calibrated model-specific error-class thresholds and sensitivity analysis
 - [ ] Deep CNN/ConvLSTM/Transformer rainfall-error classifier
 
 ### Phase 6 current focus
-`climatevar.verification` now provides a common-grid baseline, exact common-period alignment, deterministic and categorical scorecards, multi-product comparison and transparent weighted ranking. This is intended as the evaluation layer beneath rainfall error tagging. Published Indian-region assessments show that product performance varies with region, topography and rainfall intensity, supporting conditional rather than universal rankings. The next step is to connect real dataset adapters and build publication-ready spatial/seasonal/intensity reports.
+`climatevar.verification` now provides dataset-family adapters, explicit reference/product specifications, common-period alignment, optional linear/nearest or xESMF regridding, deterministic and categorical scorecards, seasonal and rainfall-intensity conditioning, India/Odisha regional subsetting, spatial metric fields, transparent weighted ranking and ML/error-tagging outputs. The remaining research step is independent numerical validation on real ERA5/IMERG/IMDAA/WRF/CMIP6 files and calibrated uncertainty/sensitivity analysis.
 
 ## Phase 7 — Research-scale computation
 - [ ] Dask-aware trend and bootstrap algorithms
