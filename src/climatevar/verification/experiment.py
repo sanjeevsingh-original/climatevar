@@ -11,12 +11,10 @@ from .datasets import ProductSpec
 
 DEFAULT_SEASONS = {"MAM": (3, 4, 5), "JJA": (6, 7, 8), "JJAS": (6, 7, 8, 9), "SON": (9, 10, 11), "DJF": (12, 1, 2)}
 DEFAULT_INTENSITIES = (("dry", 0.0, 1.0), ("light", 1.0, 10.0), ("moderate", 10.0, 20.0), ("heavy", 20.0, 50.0), ("very_heavy", 50.0, 100.0), ("extreme", 100.0, np.inf))
-# Bounds are explicit analysis defaults; use a custom tuple for publication domains.
 REGION_BOUNDS = {"odisha": (17.7, 22.6, 81.3, 87.5), "india": (6.0, 37.5, 68.0, 97.5)}
 
 @dataclass(frozen=True)
 class ExperimentConfig:
-    """Configuration for a multi-product precipitation evaluation."""
     reference: ProductSpec
     products: tuple[ProductSpec, ...]
     start: str | None = None
@@ -27,6 +25,9 @@ class ExperimentConfig:
     common_grid_method: str | None = None
     regrid_method: str | None = None
     region: str | tuple[float, float, float, float] | None = None
+    uncertainty_resamples: int = 0
+    block_length: int = 7
+    random_state: int = 0
     output_name: str = "precipitation_comparison"
 
 @dataclass
@@ -37,20 +38,18 @@ class ExperimentResult:
     ranking: pd.DataFrame
     spatial: xr.Dataset
     error_features: xr.Dataset
+    uncertainty: pd.DataFrame = field(default_factory=pd.DataFrame)
     def tables(self) -> dict[str, pd.DataFrame]:
-        return {"overall": self.overall, "seasonal": self.seasonal, "intensity": self.intensity, "ranking": self.ranking}
+        return {"overall": self.overall, "seasonal": self.seasonal, "intensity": self.intensity, "ranking": self.ranking, "uncertainty": self.uncertainty}
 
 def _period(data, start, end):
     return data if start is None and end is None else data.sel(time=slice(start, end))
 
 def _subset_region(data, region):
-    if region is None:
-        return data
+    if region is None: return data
     bounds = REGION_BOUNDS.get(region.lower()) if isinstance(region, str) else region
-    if bounds is None or len(bounds) != 4:
-        raise ValueError("region must be 'odisha', 'india', or (lat_min, lat_max, lon_min, lon_max)")
-    if data.lat.ndim != 1 or data.lon.ndim != 1:
-        raise ValueError("Regional bbox selection requires 1-D lat/lon; regrid a curvilinear product first.")
+    if bounds is None or len(bounds) != 4: raise ValueError("region must be 'odisha', 'india', or (lat_min, lat_max, lon_min, lon_max)")
+    if data.lat.ndim != 1 or data.lon.ndim != 1: raise ValueError("Regional bbox selection requires 1-D lat/lon; regrid a curvilinear product first.")
     lat_min, lat_max, lon_min, lon_max = map(float, bounds)
     lat_slice = slice(lat_min, lat_max) if float(data.lat[0]) < float(data.lat[-1]) else slice(lat_max, lat_min)
     lon_slice = slice(lon_min, lon_max) if float(data.lon[0]) < float(data.lon[-1]) else slice(lon_max, lon_min)
@@ -58,18 +57,14 @@ def _subset_region(data, region):
 
 def _regrid(reference, candidate, method):
     if method is None:
-        if candidate.lat.ndim != 1 or candidate.lon.ndim != 1:
-            raise ValueError("Curvilinear candidate grids require regrid_method='bilinear' or 'conservative'.")
+        if candidate.lat.ndim != 1 or candidate.lon.ndim != 1: raise ValueError("Curvilinear candidate grids require regrid_method='bilinear' or 'conservative'.")
         return candidate
     if method in {"linear", "nearest", "nearest_s2d"}:
-        if candidate.lat.ndim != 1 or candidate.lon.ndim != 1:
-            raise ValueError("xarray interpolation requires 1-D lat/lon; use xESMF bilinear/conservative for WRF.")
+        if candidate.lat.ndim != 1 or candidate.lon.ndim != 1: raise ValueError("xarray interpolation requires 1-D lat/lon; use xESMF bilinear/conservative for WRF.")
         return candidate.interp(lat=reference.lat, lon=reference.lon, method="nearest" if method != "linear" else "linear")
     if method in {"conservative", "bilinear", "patch"}:
-        try:
-            import xesmf as xe
-        except ImportError as exc:
-            raise ImportError("xesmf is required for conservative/bilinear/patch regridding; install climatevar[regrid].") from exc
+        try: import xesmf as xe
+        except ImportError as exc: raise ImportError("xesmf is required for conservative/bilinear/patch regridding; install climatevar[regrid].") from exc
         return xe.Regridder(candidate, reference, method, periodic=False, reuse_weights=False)(candidate)
     raise ValueError(f"Unsupported regrid method {method!r}.")
 
@@ -92,9 +87,26 @@ def _conditional_rows(reference, candidate, name, threshold, bins, *, period):
         mask = (reference >= low) & (reference < high); r, p = reference.where(mask), candidate.where(mask)
         try:
             row = _metric_row(r, p, name, threshold, period, label); row["n_events"] = int(mask.sum().values)
-        except (ValueError, ZeroDivisionError):
-            row = {"dataset": name, "period": period, "subset": label, "n_events": int(mask.sum().values)}
+        except (ValueError, ZeroDivisionError): row = {"dataset": name, "period": period, "subset": label, "n_events": int(mask.sum().values)}
         rows.append(row)
+    return rows
+
+def _bootstrap_indices(n, block, rng):
+    block = max(1, min(int(block), n)); starts = rng.integers(0, n, size=int(np.ceil(n / block))); idx = np.concatenate([(np.arange(s, s + block) % n) for s in starts])[:n]; return idx
+
+def _bootstrap_uncertainty(reference, candidate, name, threshold, resamples, block_length, rng):
+    n = reference.sizes.get("time", 0)
+    if n < 3 or resamples <= 0: return []
+    rows = []
+    metrics = {m: [] for m in ("bias", "mae", "rmse", "correlation", "pod", "far", "f1", "threat_score")}
+    for _ in range(int(resamples)):
+        idx = _bootstrap_indices(n, block_length, rng)
+        r = reference.isel(time=idx); p = candidate.isel(time=idx)
+        row = evaluate_product(r, p, name=name, threshold=threshold)
+        for metric in metrics: metrics[metric].append(row[metric])
+    for metric, values in metrics.items():
+        q = np.nanpercentile(values, [2.5, 50, 97.5])
+        rows.append({"dataset": name, "metric": metric, "lower_95": q[0], "median": q[1], "upper_95": q[2], "n_resamples": int(resamples), "block_length": int(block_length)})
     return rows
 
 def run_experiment(config: ExperimentConfig) -> ExperimentResult:
@@ -105,19 +117,22 @@ def run_experiment(config: ExperimentConfig) -> ExperimentResult:
         data = _period(spec.load(), config.start, config.end)
         data = _regrid(reference, data, config.regrid_method or config.common_grid_method)
         products[spec.name] = _subset_region(data, config.region)
-    overall_rows, seasonal_rows, intensity_rows, spatial_sets, error_sets = [], [], [], [], []
+    overall_rows, seasonal_rows, intensity_rows, spatial_sets, error_sets, uncertainty_rows = [], [], [], [], [], []
+    rng = np.random.default_rng(config.random_state)
     for name, product in products.items():
         overall_rows.append(_metric_row(reference, product, name, config.threshold, "all")); spatial_sets.append(_spatial_metrics(reference, product, name, config.threshold))
         for season, months in config.seasons.items():
             r = reference.where(reference.time.dt.month.isin(list(months)), drop=True); p = product.where(product.time.dt.month.isin(list(months)), drop=True)
             if r.sizes.get("time", 0): seasonal_rows.append(_metric_row(r, p, name, config.threshold, season))
         intensity_rows.extend(_conditional_rows(reference, product, name, config.threshold, config.intensity_bins, period="all"))
+        uncertainty_rows.extend(_bootstrap_uncertainty(reference, product, name, config.threshold, config.uncertainty_resamples, config.block_length, rng))
         ef = build_error_features(reference, product)
         if "dataset" not in ef.dims: ef = ef.expand_dims(dataset=[name])
         error_sets.append(ef)
     overall, seasonal, intensity = pd.DataFrame(overall_rows), pd.DataFrame(seasonal_rows), pd.DataFrame(intensity_rows)
     ranking = rank_products(overall.to_dict("records")) if len(overall) else pd.DataFrame()
-    return ExperimentResult(overall, seasonal, intensity, ranking, _safe_concat(spatial_sets), _safe_concat(error_sets))
+    uncertainty = pd.DataFrame(uncertainty_rows)
+    return ExperimentResult(overall, seasonal, intensity, ranking, _safe_concat(spatial_sets), _safe_concat(error_sets), uncertainty)
 
 def save_experiment(result: ExperimentResult, output_dir, *, prefix="precipitation_comparison"):
     """Save tables plus spatial and ML/error-tagging NetCDF outputs."""
