@@ -46,7 +46,7 @@ Trend methods now include independent numerical reference checks. Sen's slope us
 - [ ] Add uncertainty and sensitivity options for percentile thresholds
 
 ### Phase 3 current focus
-The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Independent tests calculate expected values directly from the published definitions rather than reusing `climatevar` internals.
+The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Independent tests calculate expected values directly from the published definitions.
 
 The repository also contains an external RClimDex validation harness, but the current CI runner cannot install the legacy `PCICt`/`climdex.pcic` packages from current CRAN/R 4.6.1. Therefore this is retained as an optional external validation harness rather than a blocking release gate until a reproducible archived/containerized reference environment is added.
 
@@ -55,13 +55,16 @@ The repository also contains an external RClimDex validation harness, but the cu
 - [x] GPD/POT framework
 - [x] Parametric bootstrap confidence intervals for GEV return levels
 - [ ] Non-stationary extreme-value models
-- [ ] Diagnostic plots and goodness-of-fit tests
+- [x] Diagnostic plots/data and goodness-of-fit statistics
 - [x] Threshold-selection diagnostics
 - [x] Runs-based declustering for dependent exceedances
 - [x] Bootstrap confidence intervals for POT return levels
+- [x] Threshold sensitivity workflow
+- [ ] Formal calibrated goodness-of-fit inference with fitted-parameter bootstrap
+- [ ] Threshold-selection uncertainty propagated into final confidence intervals
 
 ### Phase 4 current focus
-GEV fitting and return levels are available, with reproducible parametric-bootstrap uncertainty intervals. POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting, threshold stability diagnostics, runs-based declustering, return levels and reproducible parametric-bootstrap uncertainty. Threshold-selection uncertainty and formal goodness-of-fit diagnostics remain open work; these should be developed before treating POT as a fully automated publication workflow.
+POT now provides threshold exceedance extraction, GPD maximum-likelihood fitting, mean-excess and parameter-stability diagnostics, runs-based declustering, return levels, threshold sensitivity, descriptive KS/Anderson-Darling fit diagnostics, and reproducible parametric-bootstrap uncertainty. The API deliberately does not silently select a threshold. Formal calibrated goodness-of-fit inference, threshold-selection uncertainty, and non-stationary GPD models remain future work.
 
 ## Phase 5 — Dataset interoperability
 
