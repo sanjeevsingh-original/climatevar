@@ -73,5 +73,5 @@ def drought_category(index):
 
 def fit_quality(index):
     values=index.values[np.isfinite(index.values)]
-    if values.size<3:return xr.Dataset({"n":xr.DataArray(int(values.size)),"mean":xr.DataArray(np.nan),"std":xr.DataArray(np.nan),"ks_pvalue":xr.DataArray(np.nan)})
-    ks=kstest(values,"norm"); return xr.Dataset({"n":xr.DataArray(int(values.size)),"mean":xr.DataArray(float(np.mean(values))),"std":xr.DataArray(float(np.std(values,ddof=1))),"ks_pvalue":xr.DataArray(float(ks.pvalue))})
+    if values.size<3:return xr.Dataset({"n":xr.DataArray(int(values.size)),"mean":xr.DataArray(np.nan),"std":xr.DataArray(np.nan),"normality_pvalue":xr.DataArray(np.nan)})
+    ks=kstest(values,"norm"); return xr.Dataset({"n":xr.DataArray(int(values.size)),"mean":xr.DataArray(float(np.mean(values))),"std":xr.DataArray(float(np.std(values,ddof=1))),"normality_pvalue":xr.DataArray(float(ks.pvalue))})
