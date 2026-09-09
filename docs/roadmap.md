@@ -48,15 +48,18 @@ Trend methods now include independent numerical reference checks. Sen's slope us
 ### Phase 3 current focus
 The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Independent tests calculate expected values directly from the published definitions rather than reusing `climatevar` internals.
 
-An automated external-reference gate has now been added to CI. It installs the independent `climdex.pcic` numerical engine used by RClimDex, generates a deterministic 1961–1991 daily test series, computes 1991 precipitation indices from the R implementation, and compares them with `climatevar`. The roadmap item remains unchecked until that external CI job completes successfully. The RClimDex documentation and source identify `climdex.pcic` as the numerical implementation used for the indices, and the current `climdex.pcic` implementation uses Hyndman-Fan quantile type 8 for R95p/R99p.
+The repository also contains an external RClimDex validation harness, but the current CI runner cannot install the legacy `PCICt`/`climdex.pcic` packages from current CRAN/R 4.6.1. Therefore this is retained as an optional external validation harness rather than a blocking release gate until a reproducible archived/containerized reference environment is added.
 
 ## Phase 4 — Extremes and uncertainty
 
 - [ ] GPD/POT framework
-- [ ] Bootstrap confidence intervals for extreme-value parameters and return levels
+- [x] Parametric bootstrap confidence intervals for GEV return levels
 - [ ] Non-stationary extreme-value models
 - [ ] Diagnostic plots and goodness-of-fit tests
 - [ ] Threshold-selection diagnostics
+
+### Phase 4 current focus
+GEV fitting and return levels are available, and `gev_return_level_ci` now provides reproducible parametric-bootstrap uncertainty intervals. GPD/POT remains the next major extreme-value capability.
 
 ## Phase 5 — Dataset interoperability
 
