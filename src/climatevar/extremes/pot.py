@@ -1,9 +1,4 @@
-"""Peaks-over-threshold (POT) analysis with a generalized Pareto model.
-
-The implementation follows the standard POT formulation: exceedances above a
-high threshold are modeled with a GPD, while dependent exceedances can be
-reduced to cluster peaks using a runs-based declustering rule.
-"""
+"""Peaks-over-threshold (POT) analysis with a generalized Pareto model."""
 
 from __future__ import annotations
 
@@ -18,7 +13,6 @@ def _as_1d(values):
 
 def _fit_gpd_1d(excesses):
     from scipy.stats import genpareto
-
     y = _as_1d(excesses)
     if y.size < 5:
         return np.nan, np.nan, y.size
@@ -32,17 +26,14 @@ def gpd_fit(excesses: xr.DataArray, dim: str = "time") -> xr.Dataset:
     """Fit a GPD to non-negative threshold excesses using maximum likelihood."""
     if dim not in excesses.dims:
         raise ValueError(f"Dimension {dim!r} is not present in the input data.")
-    result = xr.apply_ufunc(
-        _fit_gpd_1d,
-        excesses,
-        input_core_dims=[[dim]], output_core_dims=[[], [], []],
-        vectorize=True, dask="parallelized", output_dtypes=[float, float, int],
-    )
+    result = xr.apply_ufunc(_fit_gpd_1d, excesses, input_core_dims=[[dim]],
+                            output_core_dims=[[], [], []], vectorize=True,
+                            dask="parallelized", output_dtypes=[float, float, int])
     return xr.Dataset({"shape": result[0], "scale": result[1], "n_exceedances": result[2]})
 
 
 def pot_exceedances(data: xr.DataArray, threshold: float, dim: str = "time") -> xr.DataArray:
-    """Return positive excesses above ``threshold``; values at/below threshold are NaN."""
+    """Return positive excesses above ``threshold``; other values are NaN."""
     if dim not in data.dims:
         raise ValueError(f"Dimension {dim!r} is not present in the input data.")
     if not np.isfinite(threshold):
@@ -50,18 +41,9 @@ def pot_exceedances(data: xr.DataArray, threshold: float, dim: str = "time") -> 
     return (data - threshold).where(data > threshold)
 
 
-def decluster_exceedances(
-    data: xr.DataArray,
-    threshold: float,
-    run_length: int = 3,
-    dim: str = "time",
-) -> xr.DataArray:
-    """Extract cluster peaks from threshold exceedances using a runs rule.
-
-    Consecutive exceedances separated by fewer than ``run_length`` non-exceeding
-    observations belong to the same cluster. The maximum value from each
-    cluster is retained, with all other observations set to NaN.
-    """
+def decluster_exceedances(data: xr.DataArray, threshold: float, run_length: int = 3,
+                          dim: str = "time") -> xr.DataArray:
+    """Extract cluster peaks using a runs rule."""
     if dim not in data.dims:
         raise ValueError(f"Dimension {dim!r} is not present in the input data.")
     if run_length < 1:
@@ -71,14 +53,12 @@ def decluster_exceedances(
         raise ValueError("decluster_exceedances currently requires a one-dimensional series.")
     out = np.full(y.shape, np.nan, dtype=float)
     exceed = np.isfinite(y) & (y > threshold)
-    i = 0
-    n = y.size
+    i, n = 0, y.size
     while i < n:
         if not exceed[i]:
             i += 1
             continue
-        end = i + 1
-        gap = 0
+        end, gap = i + 1, 0
         while end < n:
             if exceed[end]:
                 gap = 0
@@ -97,82 +77,74 @@ def decluster_exceedances(
     return xr.DataArray(out, coords=data.coords, dims=data.dims, attrs=data.attrs, name=data.name)
 
 
-def threshold_diagnostics(
-    data: xr.DataArray,
-    thresholds,
-    dim: str = "time",
-) -> xr.Dataset:
-    """Compute threshold diagnostics: exceedance count/rate and GPD parameter stability."""
+def _threshold_table(data, thresholds):
+    y = _as_1d(data)
+    n = y.size
+    counts = np.array([np.sum(y > u) for u in thresholds], dtype=int)
+    rates = counts / n if n else np.full(len(thresholds), np.nan)
+    shapes = np.full(len(thresholds), np.nan)
+    scales = np.full(len(thresholds), np.nan)
+    mean_excess = np.full(len(thresholds), np.nan)
+    for j, u in enumerate(thresholds):
+        excess = y[y > u] - u
+        if excess.size >= 5:
+            shapes[j], scales[j], _ = _fit_gpd_1d(excess)
+            mean_excess[j] = np.mean(excess)
+    return counts, rates, shapes, scales, mean_excess
+
+
+def threshold_diagnostics(data: xr.DataArray, thresholds, dim: str = "time") -> xr.Dataset:
+    """Diagnose threshold choice using exceedance rate, mean excess and GPD stability."""
     if dim not in data.dims:
         raise ValueError(f"Dimension {dim!r} is not present in the input data.")
     thresholds = np.asarray(thresholds, dtype=float)
     if thresholds.ndim != 1 or thresholds.size == 0 or np.any(~np.isfinite(thresholds)):
         raise ValueError("thresholds must be a non-empty one-dimensional finite sequence.")
-    y = _as_1d(data.values)
-    n = y.size
-    counts = np.array([np.sum(y > u) for u in thresholds], dtype=int)
-    rates = counts / n if n else np.full(thresholds.size, np.nan)
-    shapes = np.full(thresholds.size, np.nan)
-    scales = np.full(thresholds.size, np.nan)
-    for j, u in enumerate(thresholds):
-        if counts[j] >= 5:
-            shapes[j], scales[j], _ = _fit_gpd_1d(y[y > u] - u)
+    counts, rates, shapes, scales, mean_excess = _threshold_table(data.values, thresholds)
     return xr.Dataset({"threshold": ("threshold", thresholds), "n_exceedances": ("threshold", counts),
                        "exceedance_rate": ("threshold", rates), "shape": ("threshold", shapes),
-                       "scale": ("threshold", scales)})
+                       "scale": ("threshold", scales), "mean_excess": ("threshold", mean_excess)})
 
 
 def _return_level(shape, scale, threshold, rate, return_period):
     if return_period <= 0 or rate <= 0 or scale <= 0:
         return np.nan
     target = rate * return_period
-    if shape < 0 and target <= 0:
+    # Standard POT return levels above the threshold require a return period
+    # longer than the mean recurrence interval of threshold exceedances.
+    if target <= 1:
+        return np.nan
+    if shape < 0 and target ** shape >= 1:
         return np.nan
     if abs(shape) < 1e-8:
         return threshold + scale * np.log(target)
     return threshold + scale / shape * (target ** shape - 1.0)
 
 
-def pot_return_level(
-    threshold: float,
-    shape: float,
-    scale: float,
-    exceedance_rate: float,
-    return_period: float,
-) -> float:
+def pot_return_level(threshold: float, shape: float, scale: float,
+                     exceedance_rate: float, return_period: float) -> float:
     """Return level for a stationary POT model.
 
-    ``exceedance_rate`` is the expected number of independent threshold
-    exceedances per observation unit, and ``return_period`` uses the same unit.
-    For daily data, for example, a rate per day requires a return period in
-    days; for annualized results use an annualized rate and years.
+    ``exceedance_rate`` and ``return_period`` must use the same observation
+    unit. The return period must exceed the threshold exceedance recurrence
+    interval so the reported level is above the threshold.
     """
     return float(_return_level(shape, scale, threshold, exceedance_rate, return_period))
 
 
-def pot_return_level_ci(
-    data: xr.DataArray,
-    threshold: float,
-    return_period: float,
-    dim: str = "time",
-    decluster_run_length: int | None = None,
-    n_resamples: int = 1000,
-    alpha: float = 0.05,
-    random_state: int | None = 0,
-) -> xr.Dataset:
-    """Fit a POT-GPD model and estimate return-level uncertainty by bootstrap.
-
-    The bootstrap resamples independent excesses with replacement and refits
-    the GPD. If ``decluster_run_length`` is supplied, cluster peaks are used
-    and the exceedance rate is based on the retained independent peaks.
-    """
+def pot_return_level_ci(data: xr.DataArray, threshold: float, return_period: float,
+                        dim: str = "time", decluster_run_length: int | None = None,
+                        n_resamples: int = 1000, alpha: float = 0.05,
+                        random_state: int | None = 0) -> xr.Dataset:
+    """Fit POT-GPD and estimate return-level uncertainty by bootstrap."""
     if not 0 < alpha < 1:
         raise ValueError("alpha must be between 0 and 1.")
     if n_resamples < 100:
         raise ValueError("n_resamples must be at least 100.")
     if return_period <= 0:
         raise ValueError("return_period must be positive.")
-
+    if dim not in data.dims:
+        raise ValueError(f"Dimension {dim!r} is not present in the input data.")
     y = np.asarray(data.values, dtype=float)
     if y.ndim != 1:
         raise ValueError("pot_return_level_ci currently requires a one-dimensional series.")
@@ -191,7 +163,6 @@ def pot_return_level_ci(
     rate = n_exc / n_obs
     observed = _return_level(shape, scale, threshold, rate, return_period)
     rng = np.random.default_rng(random_state)
-    from scipy.stats import genpareto
     levels = np.full(n_resamples, np.nan)
     for i in range(n_resamples):
         sample = rng.choice(excess, size=n_exc, replace=True)
@@ -207,4 +178,59 @@ def pot_return_level_ci(
                        "exceedance_rate": rate})
 
 
-__all__ = ["gpd_fit", "pot_exceedances", "decluster_exceedances", "threshold_diagnostics", "pot_return_level", "pot_return_level_ci"]
+def pot_threshold_sensitivity(data: xr.DataArray, thresholds, return_period: float,
+                              dim: str = "time") -> xr.Dataset:
+    """Evaluate POT parameters and return level across candidate thresholds.
+
+    This is a sensitivity analysis, not an automatic threshold selector. Stable
+    parameter estimates and a defensible mean-residual-life region should be
+    assessed before choosing a threshold.
+    """
+    if return_period <= 0:
+        raise ValueError("return_period must be positive.")
+    thresholds = np.asarray(thresholds, dtype=float)
+    if thresholds.ndim != 1 or thresholds.size == 0 or np.any(~np.isfinite(thresholds)):
+        raise ValueError("thresholds must be a non-empty one-dimensional finite sequence.")
+    counts, rates, shapes, scales, mean_excess = _threshold_table(data.values, thresholds)
+    levels = np.array([_return_level(xi, sig, u, rate, return_period)
+                       for u, xi, sig, rate in zip(thresholds, shapes, scales, rates)])
+    return xr.Dataset({"threshold": ("threshold", thresholds), "n_exceedances": ("threshold", counts),
+                       "exceedance_rate": ("threshold", rates), "shape": ("threshold", shapes),
+                       "scale": ("threshold", scales), "mean_excess": ("threshold", mean_excess),
+                       "return_level": ("threshold", levels)})
+
+
+def gpd_goodness_of_fit(excesses: xr.DataArray, dim: str = "time") -> xr.Dataset:
+    """Return PIT/QQ/PP diagnostics and KS/AD statistics for a fitted GPD.
+
+    The tests are descriptive diagnostics: because GPD parameters are estimated
+    from the same sample, their p-values are not treated as exact null p-values.
+    Use bootstrap or simulation for formal calibrated inference.
+    """
+    from scipy.stats import anderson, genpareto, kstest
+    if dim not in excesses.dims:
+        raise ValueError(f"Dimension {dim!r} is not present in the input data.")
+    y = _as_1d(excesses.values)
+    if y.size < 5:
+        return xr.Dataset({"ks_statistic": np.nan, "ks_pvalue": np.nan,
+                           "ad_statistic": np.nan, "n_exceedances": y.size})
+    shape, scale, _ = _fit_gpd_1d(y)
+    pit = genpareto.cdf(y, shape, loc=0, scale=scale)
+    ks = kstest(pit, "uniform")
+    # Anderson-Darling is computed on the PIT sample; scipy's uniform option
+    # is not available on all supported SciPy versions, so use the equivalent
+    # exponential transform for the AD diagnostic.
+    z = -np.log(np.clip(1.0 - pit, np.finfo(float).eps, 1.0))
+    ad = anderson(z, dist="expon")
+    order = np.sort(y)
+    probs = (np.arange(1, y.size + 1) - 0.5) / y.size
+    theoretical = genpareto.ppf(probs, shape, loc=0, scale=scale)
+    return xr.Dataset({"ks_statistic": float(ks.statistic), "ks_pvalue": float(ks.pvalue),
+                       "ad_statistic": float(ad.statistic), "n_exceedances": y.size,
+                       "pit": ("exceedance", np.sort(pit)),
+                       "qq_observed": ("exceedance", order),
+                       "qq_theoretical": ("exceedance", theoretical)})
+
+
+__all__ = ["gpd_fit", "pot_exceedances", "decluster_exceedances", "threshold_diagnostics",
+           "pot_threshold_sensitivity", "gpd_goodness_of_fit", "pot_return_level", "pot_return_level_ci"]
