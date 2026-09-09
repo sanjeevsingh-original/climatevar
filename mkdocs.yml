@@ -11,6 +11,7 @@ nav:
       - API cookbook: api.md
       - Trend analysis: trends.md
       - Precipitation verification: verification.md
+      - Comparative precipitation verification: comparative_verification.md
       - Rainfall error tagging: error_tagging.md
       - ML/DL error classification: ml_error_tagging.md
       - Extreme-value analysis: extremes.md
