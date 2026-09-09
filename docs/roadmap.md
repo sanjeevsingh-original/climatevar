@@ -55,13 +55,19 @@ The precipitation indices use the ETCCDI wet-day convention (RR >= 1 mm; dry day
 - [x] Descriptive KS/Anderson-Darling and PIT/QQ diagnostics
 - [x] Fitted-parameter parametric-bootstrap calibration for POT goodness-of-fit statistics
 - [x] Empirical threshold-selection uncertainty envelope
+- [x] Bootstrap propagation through an explicit AIC threshold-selection rule
 - [x] First non-stationary GPD model with covariate-dependent scale
-- [ ] Propagate threshold-selection uncertainty into formal probability intervals
-- [ ] Non-stationary GPD model comparison, covariate selection and robust inference
-- [ ] Publication-quality EVT plots and automated diagnostic reports
+- [x] Stationary vs non-stationary GPD comparison with AIC/BIC and LR diagnostics
+- [x] Parametric-bootstrap LR inference for non-stationarity
+- [x] Bootstrap parameter intervals for non-stationary GPD
+- [x] Publication-quality EVT plotting utilities
+- [x] Automated HTML POT diagnostic reports
+- [ ] Formal Bayesian/model-averaged threshold-selection uncertainty
+- [ ] Robust non-stationary model comparison across multiple covariates and dependence structures
+- [ ] External independent EVT reference validation
 
 ### Phase 4 current focus
-POT now provides a diagnostic-first foundation: threshold exploration, GPD fitting, declustering, return levels, sampling uncertainty, calibrated bootstrap GOF diagnostics, threshold sensitivity, threshold-selection envelopes, and a conservative non-stationary scale model. The package does not silently select thresholds or present an empirical threshold envelope as a conventional confidence interval.
+POT now provides threshold exploration, GPD fitting, declustering, return levels, sampling uncertainty, calibrated bootstrap GOF diagnostics, threshold sensitivity, bootstrap propagation through an explicit threshold-selection rule, and conservative non-stationary inference. Advanced results remain conditional on the documented candidate thresholds, selection rule, covariates and stochastic assumptions.
 
 ## Phase 5 — Dataset interoperability
 - [ ] Robust ERA5 / ERA5-Land adapters
@@ -87,12 +93,11 @@ POT now provides a diagnostic-first foundation: threshold exploration, GPD fitti
 - [ ] Optional accelerated numerical backends where justified
 
 ## Phase 8 — Scientific usability
-- [ ] Publication-quality plotting utilities
 - [ ] Reproducible worked examples for Indian Summer Monsoon research
 - [ ] Example workflows for Odisha precipitation extremes
 - [ ] Notebook suite covering ERA5, IMERG, IMDAA, WRF and CMIP6
 - [x] Validation fixtures and expected-value regression datasets for core precipitation indices
-- [ ] Research-method reporting helpers
+- [x] EVT diagnostic and research-method reporting helpers
 
 ## Phase 9 — Stable release
 - [ ] API stability review
