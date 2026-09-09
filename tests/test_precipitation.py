@@ -23,52 +23,55 @@ def make_data(units="mm"):
     return xr.DataArray(values, coords={"time": time}, dims="time", attrs={"units": units})
 
 
+KW = {"min_valid_fraction": 0}
+
+
 def test_rx1day():
-    result = rx1day(make_data())
+    result = rx1day(make_data(), **KW)
     assert result.item() == 30
     assert result.attrs["units"] == "mm"
 
 
 def test_rx5day():
-    result = rx5day(make_data())
+    result = rx5day(make_data(), **KW)
     assert result.item() == 37
     assert result.attrs["units"] == "mm"
 
 
 def test_prcptot_and_threshold_counts():
     data = make_data()
-    assert prcptot(data).item() == 72
-    assert r10mm(data).item() == 3
-    assert r20mm(data).item() == 2
+    assert prcptot(data, **KW).item() == 72
+    assert r10mm(data, **KW).item() == 3
+    assert r20mm(data, **KW).item() == 2
 
 
 def test_percentile_indices_with_explicit_reference():
     data = make_data()
     threshold = xr.DataArray(9.0, attrs={"units": "mm"})
-    assert r95p(data, reference=threshold).item() == 60
-    assert r99p(data, reference=threshold).item() == 60
+    assert r95p(data, reference=threshold, **KW).item() == 60
+    assert r99p(data, reference=threshold, **KW).item() == 60
 
 
 def test_consecutive_days():
     data = make_data()
-    assert cwd(data).item() == 4
-    assert cdd(data).item() == 2
+    assert cwd(data, **KW).item() == 4
+    assert cdd(data, **KW).item() == 2
 
 
 def test_amount_units_are_normalized_to_mm():
-    result = rx1day(make_data("m"))
+    result = rx1day(make_data("m"), **KW)
     assert result.item() == 30000
     assert result.attrs["units"] == "mm"
 
 
 def test_missing_units_are_implicitly_treated_as_mm():
     data = make_data().drop_attrs()
-    assert rx1day(data).item() == 30
+    assert rx1day(data, **KW).item() == 30
 
 
 def test_daily_rate_is_accepted_implicitly():
     data = make_data("mm/day")
-    result = rx1day(data)
+    result = rx1day(data, **KW)
     assert result.item() == 30
 
 
@@ -83,7 +86,7 @@ def test_hourly_rate_is_aggregated_to_daily_amount():
     daily = daily_amount(data)
     assert daily.attrs["units"] == "mm"
     assert np.allclose(daily.values, [24.0, 24.0])
-    assert rx1day(data).item() == 24.0
+    assert rx1day(data, **KW).item() == 24.0
 
 
 def test_native_normalization_uses_sampling_resolution():
@@ -105,13 +108,13 @@ def test_native_normalization_uses_sampling_resolution():
 def test_percentile_reference_accepts_common_amount_units():
     data = make_data()
     threshold = xr.DataArray(0.009, attrs={"units": "m"})
-    assert r95p(data, reference=threshold).item() == 60
+    assert r95p(data, reference=threshold, **KW).item() == 60
 
 
 def test_unsupported_precipitation_units_raise():
     data = make_data("inches")
     try:
-        rx1day(data)
+        rx1day(data, **KW)
     except ValueError as exc:
         assert "Unsupported precipitation units" in str(exc)
     else:
