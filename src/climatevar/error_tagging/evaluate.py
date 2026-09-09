@@ -17,7 +17,6 @@ def cross_validate_classifier(X, y, groups=None, strategy="group", n_splits=5,
         raise ImportError("Cross-validation requires `climatevar[ml]`.") from exc
     from .models import fit_classifier, classification_metrics
 
-    n = len(y)
     if strategy == "time":
         splitter = TimeSeriesSplit(n_splits=n_splits)
         splits = splitter.split(X)
@@ -35,13 +34,15 @@ def cross_validate_classifier(X, y, groups=None, strategy="group", n_splits=5,
     else:
         raise ValueError("strategy must be 'time', 'group', or 'stratified_group'.")
 
+    y_array = np.asarray(y)
     rows = []
     for fold, (train, test) in enumerate(splits):
-        est = fit_classifier(X[train], np.asarray(y)[train], model=model,
+        est = fit_classifier(X[train], y_array[train], model=model,
                              random_state=random_state + fold, **model_kwargs)
         pred = est.predict(X[test])
         prob = est.predict_proba(X[test]) if hasattr(est, "predict_proba") else None
-        metrics = classification_metrics(np.asarray(y)[test], pred, prob)
+        classes = getattr(est, "classes_", None)
+        metrics = classification_metrics(y_array[test], pred, prob, labels=classes)
         metrics["fold"] = fold
         metrics["n_train"] = len(train)
         metrics["n_test"] = len(test)
