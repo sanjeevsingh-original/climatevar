@@ -4,7 +4,7 @@
 
 ## Odisha-ready experiment
 
-For the standard Odisha analysis, use `odisha_experiment()`. It defaults to the common 2000–2018 period, matching the historical availability of the IMDAA archive described by IMD. IMD's 0.25° daily gridded rainfall is available as a NetCDF product in millimetres and is an appropriate declared reference candidate for an India-focused evaluation. citeturn0search0turn0search3
+For the standard Odisha analysis, use `odisha_experiment()`. It defaults to the common 2000–2018 period, matching the historical availability of the IMDAA archive described by IMD. IMD's 0.25° daily gridded rainfall is available as a NetCDF product in millimetres and is an appropriate declared reference candidate for an India-focused evaluation.
 
 ```python
 from climatevar.verification import odisha_experiment, run_experiment, save_experiment
@@ -28,6 +28,33 @@ save_experiment(result, "results/odisha_2000_2018")
 
 The experiment uses an explicit Odisha bounding envelope before verification. For publication figures, replace this envelope with an authoritative Odisha administrative polygon or watershed mask if exact area boundaries are required.
 
+## Automated publication figure/report bundle
+
+After the experiment has run, generate a complete manuscript-oriented bundle with:
+
+```python
+from climatevar.verification import generate_publication_report
+
+files, summary = generate_publication_report(
+    result,
+    "results/odisha_2000_2018/figures",
+    prefix="odisha_2000_2018",
+)
+print(summary)
+print(files)
+```
+
+The generator produces:
+
+- one spatial panel for each of Bias, MAE, RMSE, POD and FAR;
+- seasonal RMSE and Bias heatmaps for MAM/JJAS/ON;
+- rainfall-intensity-conditioned error distributions;
+- bootstrap point estimates and 95% uncertainty intervals;
+- a comparative ranking heatmap;
+- `*_summary.csv`, a compact manuscript-ready component scorecard.
+
+All raster figures are saved at 300 dpi. The plotting functions do not silently add a geographic projection or administrative boundary: this keeps the scientific field values separate from cartographic choices. For a paper, add a consistent Cartopy projection, Odisha boundary, scale bar/gridlines and standardized color limits in the journal-specific figure layer.
+
 ## Outputs
 
 The runner writes:
@@ -44,7 +71,7 @@ The uncertainty analysis uses a reproducible circular moving-block bootstrap ove
 
 ## Spatial maps
 
-The optional `climatevar.verification.plots` module provides `plot_spatial_metric()` and `plot_scorecard()`. The spatial NetCDF output is deliberately kept independent of plotting, so the same fields can be rendered with Matplotlib, Cartopy or GIS software.
+The optional `climatevar.verification.plots` module provides `plot_spatial_metric()` and `plot_scorecard()`. The higher-level `report` module provides publication panels and automatically saves them as 300-dpi PNG files. The spatial NetCDF output is deliberately kept independent of plotting, so the same fields can be rendered with Matplotlib, Cartopy or GIS software.
 
 ## Dataset adapters
 
@@ -77,6 +104,6 @@ The error-feature dataset is a diagnostic target dataset: observations define th
 
 ## Scientific reporting
 
-Do not report the composite ranking as a universal winner. Product skill can vary by region, topography, season and rainfall intensity. The IMD data portal describes the 0.25° product as a daily gauge-based gridded rainfall dataset over India, while IMDAA is a 12-km regional reanalysis covering 1979–2018. citeturn0search0turn0search3
+Do not report the composite ranking as a universal winner. Product skill can vary by region, topography, season and rainfall intensity. The IMD data portal describes the 0.25° product as a daily gauge-based gridded rainfall dataset over India, while IMDAA is a 12-km regional reanalysis covering 1979–2018.
 
-For a manuscript, retain the full component scorecard, report the common period and reference explicitly, document the regridding method, provide missing-data handling, and report uncertainty alongside the point estimates.
+For a manuscript, retain the full component scorecard, report the common period and reference explicitly, document the regridding method, provide missing-data handling, and report uncertainty alongside the point estimates. This follows the broader verification principle that metrics and graphics should be selected to answer a defined evaluation question rather than treated as a one-size-fits-all ranking.
