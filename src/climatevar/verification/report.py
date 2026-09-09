@@ -21,12 +21,7 @@ def _save(fig, path):
 
 
 def spatial_metric_panels(spatial, metric: str, *, output=None, datasets=None, ncols=2, levels=15, cmap="RdBu_r", title=None):
-    """Create a manuscript-ready panel of one spatial metric for all products.
-
-    Cartopy is optional. If a Cartopy GeoAxes is supplied by the caller, the
-    underlying xarray plotting call can be used; otherwise this remains a
-    projection-free latitude/longitude figure.
-    """
+    """Create a manuscript-ready panel of one spatial metric for all products."""
     plt = _mpl()
     if metric not in spatial:
         raise KeyError(f"Unknown spatial metric {metric!r}")
@@ -85,26 +80,49 @@ def seasonal_heatmap(seasonal: pd.DataFrame, metric="rmse", *, output=None, titl
 
 
 def intensity_distribution(intensity: pd.DataFrame, metric="bias", *, output=None, title=None):
-    """Plot error distributions by observed-rainfall intensity class."""
+    """Plot product scores across observed-rainfall intensity classes."""
     plt = _mpl()
     if metric not in intensity.columns:
         raise KeyError(f"Intensity scorecard is missing {metric!r}")
-    groups = list(intensity.groupby("subset", sort=False))
+    table = intensity.pivot(index="subset", columns="dataset", values=metric)
     fig, ax = plt.subplots(figsize=(10, 5.5))
-    positions = []
-    values = []
-    labels = []
-    for i, (label, group) in enumerate(groups, start=1):
-        values.append(group[metric].dropna().to_numpy(float))
-        positions.append(i)
-        labels.append(label.replace("_", " "))
-    if values:
-        ax.boxplot(values, positions=positions, widths=0.65, showfliers=False)
+    values = [table.loc[idx].dropna().to_numpy(float) for idx in table.index]
+    ax.boxplot(values, positions=np.arange(1, len(values) + 1), widths=0.65, showfliers=False)
     ax.axhline(0.0, linewidth=1.0)
-    ax.set_xticks(positions, labels, rotation=25, ha="right")
+    ax.set_xticks(np.arange(1, len(values) + 1), [str(x).replace("_", " ") for x in table.index], rotation=25, ha="right")
     ax.set_ylabel(metric)
     ax.set_xlabel("Observed precipitation intensity")
-    ax.set_title(title or f"Error by rainfall intensity: {metric}")
+    ax.set_title(title or f"Product score spread by rainfall intensity: {metric}")
+    fig.tight_layout()
+    return fig, _save(fig, output) if output else None
+
+
+def error_feature_distribution(error_features, *, metric="error", output=None, max_points=100000, title=None):
+    """Plot matched individual errors by observed intensity and product."""
+    plt = _mpl()
+    if metric not in error_features:
+        raise KeyError(f"Error-feature dataset is missing {metric!r}")
+    required = [metric, "observed_intensity_class"]
+    frame = error_features[required].to_dataframe().reset_index()
+    if "dataset" not in frame:
+        raise ValueError("error_features must contain a dataset dimension")
+    frame = frame.dropna(subset=required)
+    if len(frame) > max_points:
+        frame = frame.sample(int(max_points), random_state=0)
+    products = list(frame["dataset"].astype(str).unique())
+    classes = list(frame["observed_intensity_class"].astype(str).drop_duplicates())
+    fig, axes = plt.subplots(1, max(1, len(products)), figsize=(max(7, 3.8 * max(1, len(products))), 5.0), squeeze=False)
+    for ax, product in zip(axes.flat, products):
+        sub = frame[frame["dataset"].astype(str) == product]
+        groups = [sub.loc[sub["observed_intensity_class"].astype(str) == cls, metric].to_numpy(float) for cls in classes]
+        keep = [(cls, values) for cls, values in zip(classes, groups) if values.size]
+        if keep:
+            ax.boxplot([v for _, v in keep], showfliers=False)
+            ax.set_xticks(np.arange(1, len(keep) + 1), [c.replace("_", " ") for c, _ in keep], rotation=35, ha="right")
+        ax.axhline(0.0, linewidth=1.0)
+        ax.set_title(product)
+        ax.set_ylabel(metric)
+    fig.suptitle(title or "Matched precipitation-error distribution by rainfall intensity", y=1.02)
     fig.tight_layout()
     return fig, _save(fig, output) if output else None
 
@@ -157,7 +175,7 @@ def manuscript_summary(result, *, output=None, reference_name=None):
     table = overall[cols].copy()
     if reference_name is not None:
         table.insert(0, "reference", reference_name)
-    if "ranking" in result.__dict__ and not result.ranking.empty and "rank" in result.ranking.columns:
+    if not result.ranking.empty and "rank" in result.ranking.columns:
         ranks = result.ranking[[c for c in ["dataset", "rank", "composite_score"] if c in result.ranking.columns]]
         table = table.merge(ranks, on="dataset", how="left")
     if output:
@@ -167,27 +185,28 @@ def manuscript_summary(result, *, output=None, reference_name=None):
 
 def generate_publication_report(result, output_dir, *, prefix="odisha_verification", spatial_metrics=("bias", "mae", "rmse", "pod", "far"), uncertainty_metrics=("bias", "mae", "rmse", "correlation", "pod", "far")):
     """Generate the complete figure/table bundle from an ExperimentResult."""
-    out = Path(output_dir); out.mkdir(parents=True, exist_ok=True)
-    outputs = {}
+    out = Path(output_dir); out.mkdir(parents=True, exist_ok=True); outputs = {}
     for metric in spatial_metrics:
         if metric in result.spatial:
             _, path = spatial_metric_panels(result.spatial, metric, output=out / f"{prefix}_spatial_{metric}.png")
             outputs[f"spatial_{metric}"] = path
     if not result.seasonal.empty:
-        _, path = seasonal_heatmap(result.seasonal, "rmse", output=out / f"{prefix}_seasonal_rmse.png")
-        outputs["seasonal_rmse"] = path
-        if "bias" in result.seasonal:
-            _, path = seasonal_heatmap(result.seasonal, "bias", output=out / f"{prefix}_seasonal_bias.png")
-            outputs["seasonal_bias"] = path
+        for metric in ("rmse", "bias"):
+            if metric in result.seasonal:
+                _, path = seasonal_heatmap(result.seasonal, metric, output=out / f"{prefix}_seasonal_{metric}.png")
+                outputs[f"seasonal_{metric}"] = path
     if not result.intensity.empty:
-        _, path = intensity_distribution(result.intensity, "bias", output=out / f"{prefix}_intensity_bias.png")
-        outputs["intensity_bias"] = path
+        _, path = intensity_distribution(result.intensity, "bias", output=out / f"{prefix}_intensity_score_spread.png")
+        outputs["intensity_score_spread"] = path
+    if result.error_features.data_vars:
+        _, path = error_feature_distribution(result.error_features, output=out / f"{prefix}_error_distribution.png")
+        outputs["error_distribution"] = path
     if not result.uncertainty.empty:
         _, path = uncertainty_plot(result.uncertainty, output=out / f"{prefix}_uncertainty.png", metrics=uncertainty_metrics)
         outputs["uncertainty"] = path
     if not result.ranking.empty:
         _, path = ranking_heatmap(result.ranking, output=out / f"{prefix}_ranking.png")
         outputs["ranking"] = path
-    table = manuscript_summary(result, output=out / f"{prefix}_summary.csv")
+    manuscript_summary(result, output=out / f"{prefix}_summary.csv")
     outputs["summary"] = str(out / f"{prefix}_summary.csv")
-    return outputs, table
+    return outputs, manuscript_summary(result)
