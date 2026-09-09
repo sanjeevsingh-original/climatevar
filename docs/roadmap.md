@@ -46,7 +46,9 @@ Trend methods now include independent numerical reference checks. Sen's slope us
 - [ ] Add uncertainty and sensitivity options for percentile thresholds
 
 ### Phase 3 current focus
-The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Independent tests calculate expected values directly from the published definitions rather than reusing `climatevar` internals. Calendar tests cover Gregorian leap years, no-leap years and 360-day calendars when `cftime` is available.
+The precipitation indices now use the ETCCDI wet-day convention (RR >= 1 mm; dry day RR < 1 mm), default R95p/R99p percentile calibration to 1961–1990, and expose `min_valid_fraction` for annual completeness plus `min_daily_valid_fraction` for sub-daily coverage. Irregular sub-daily data are rejected for ETCCDI indices rather than silently producing potentially biased daily totals. Independent tests calculate expected values directly from the published definitions rather than reusing `climatevar` internals.
+
+An automated external-reference gate has now been added to CI. It installs the independent `climdex.pcic` numerical engine used by RClimDex, generates a deterministic 1961–1991 daily test series, computes 1991 precipitation indices from the R implementation, and compares them with `climatevar`. The roadmap item remains unchecked until that external CI job completes successfully. The RClimDex documentation and source identify `climdex.pcic` as the numerical implementation used for the indices, and the current `climdex.pcic` implementation uses Hyndman-Fan quantile type 8 for R95p/R99p.
 
 ## Phase 4 — Extremes and uncertainty
 
