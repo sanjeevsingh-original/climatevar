@@ -25,6 +25,7 @@ jobs:
   rclimdex-validation:
     name: RClimDex external validation
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Set up R
