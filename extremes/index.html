@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://sanjeevsingh-original.github.io/climatevar/extremes/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Extreme-value analysis - climatevar</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">climatevar</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting Started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../datasets/" class="dropdown-item">Common data model</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">Dataset interoperability</a>
+</li>
+                                    
+<li>
+    <a href="../api/" class="dropdown-item">API cookbook</a>
+</li>
+                                    
+<li>
+    <a href="../trends/" class="dropdown-item">Trend analysis</a>
+</li>
+                                    
+<li>
+    <a href="../verification/" class="dropdown-item">Precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../comparative_verification/" class="dropdown-item">Comparative precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../error_tagging/" class="dropdown-item">Rainfall error tagging</a>
+</li>
+                                    
+<li>
+    <a href="../ml_error_tagging/" class="dropdown-item">ML/DL error classification</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Extreme-value analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Project</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../roadmap/" class="dropdown-item">Scientific roadmap</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../ml_error_tagging/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../roadmap/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/sanjeevsingh-original/climatevar/edit/master/docs/extremes.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#extreme-value-analysis" class="nav-link">Extreme-value analysis</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#reproducible-pot-workflow" class="nav-link">Reproducible POT workflow</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#threshold-selection-and-uncertainty" class="nav-link">Threshold selection and uncertainty</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#dependence-and-declustering" class="nav-link">Dependence and declustering</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#goodness-of-fit" class="nav-link">Goodness of fit</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#non-stationary-gpd-comparison-and-inference" class="nav-link">Non-stationary GPD: comparison and inference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#return-period-units" class="nav-link">Return-period units</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#publication-quality-figures" class="nav-link">Publication-quality figures</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#automated-diagnostic-report" class="nav-link">Automated diagnostic report</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#publication-checklist" class="nav-link">Publication checklist</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="extreme-value-analysis">Extreme-value analysis</h1>
+<p><code>climatevar</code> provides block-maxima GEV and peaks-over-threshold (POT) analysis. The POT workflow is diagnostic-first: threshold choice, dependence treatment, uncertainty and stationarity are explicit.</p>
+<h2 id="reproducible-pot-workflow">Reproducible POT workflow</h2>
+<pre class="highlight"><code class="language-python">import xarray as xr
+from climatevar.extremes import (
+    pot_exceedances, gpd_fit, threshold_diagnostics, decluster_exceedances,
+    pot_threshold_sensitivity, gpd_goodness_of_fit,
+    gpd_goodness_of_fit_bootstrap, pot_threshold_bootstrap,
+    pot_return_level_ci, gpd_model_comparison_bootstrap,
+    gpd_nonstationary_ci, pot_diagnostic_report,
+)
+
+rain = xr.open_dataarray("daily_rainfall.nc")
+u = 100.0  # mm/day; justify for the study region
+excess = pot_exceedances(rain, u)
+fit = gpd_fit(excess)
+diag = threshold_diagnostics(rain, [80, 90, 100, 110, 120])
+peaks = decluster_exceedances(rain, u, run_length=3)
+sensitivity = pot_threshold_sensitivity(rain, [80, 90, 100, 110, 120], 100 * 365.25)
+gof = gpd_goodness_of_fit(excess)
+gof_boot = gpd_goodness_of_fit_bootstrap(excess, n_resamples=2000, random_state=42)
+threshold_ci = pot_threshold_bootstrap(rain, [80, 90, 100, 110, 120], 100 * 365.25,
+                                       n_resamples=2000, random_state=42)
+ci = pot_return_level_ci(rain, u, 100 * 365.25, decluster_run_length=3,
+                         n_resamples=2000, random_state=42)</code></pre>
+<h2 id="threshold-selection-and-uncertainty">Threshold selection and uncertainty</h2>
+<p>A POT threshold should be high enough for the GPD approximation to be credible while retaining enough exceedances for stable estimation. Examine exceedance counts/rates, mean residual life, shape/scale stability, return-level stability, dependence and physical event structure.</p>
+<p><code>threshold_diagnostics</code> and <code>pot_threshold_sensitivity</code> expose these diagnostics without silently selecting a threshold. <code>pot_threshold_uncertainty</code> gives an empirical return-level envelope across candidate thresholds. It is <strong>not</strong> a probability confidence interval.</p>
+<p><code>pot_threshold_bootstrap</code> goes one step further: each bootstrap sample refits every candidate threshold and applies an explicit AIC-based threshold-selection rule. The resulting percentile interval propagates sampling variability through that stated selection procedure. It should be reported as conditional on the candidate set and selection rule, not as universal threshold-selection uncertainty.</p>
+<h2 id="dependence-and-declustering">Dependence and declustering</h2>
+<p>Daily rainfall extremes can cluster because one storm can generate several consecutive exceedances. <code>decluster_exceedances</code> applies a runs rule and retains the cluster maximum. Select <code>run_length</code> using the temporal dependence structure and sampling interval; report the rule explicitly.</p>
+<h2 id="goodness-of-fit">Goodness of fit</h2>
+<p><code>gpd_goodness_of_fit</code> provides PIT, QQ and descriptive KS/Anderson-Darling diagnostics. Ordinary KS/AD p-values are not calibrated for the fact that parameters were estimated from the same observations.</p>
+<p><code>gpd_goodness_of_fit_bootstrap</code> repeatedly simulates from the fitted GPD, refits it and calibrates KS/AD statistics. The result is a fitted-model bootstrap diagnostic, not a model-free test.</p>
+<h2 id="non-stationary-gpd-comparison-and-inference">Non-stationary GPD: comparison and inference</h2>
+<p>The baseline non-stationary model keeps shape constant and models scale as</p>
+<p><code>log(sigma_t) = beta_0 + beta_1 x_t</code>.</p>
+<p><code>gpd_model_comparison</code> reports log-likelihood, AIC, BIC and an asymptotic likelihood-ratio statistic. <code>gpd_model_comparison_bootstrap</code> provides a parametric-bootstrap LR p-value and critical value under the fitted stationary null. For publication, prefer the bootstrap result when sample size or regularity assumptions make asymptotic inference questionable.</p>
+<p><code>gpd_nonstationary_ci</code> provides percentile bootstrap intervals for shape, intercept and covariate-scale coefficient. A covariate effect should only be interpreted after checking the physical rationale, residual/QQ diagnostics, dependence and model adequacy.</p>
+<h2 id="return-period-units">Return-period units</h2>
+<p>The exceedance rate and return period must use the same observation unit. For daily rainfall, use a rate per day and a return period in days; for annual exceedances, use years. Return periods at or below the threshold-exceedance recurrence interval are rejected.</p>
+<h2 id="publication-quality-figures">Publication-quality figures</h2>
+<p>With the optional <code>plot</code> dependency:</p>
+<pre class="highlight"><code class="language-python">from climatevar.extremes import plot_threshold_stability, plot_mean_excess, plot_gpd_qq
+
+ax = plot_threshold_stability(diag)
+ax.figure.savefig("threshold_stability.png", dpi=300, bbox_inches="tight")
+ax = plot_mean_excess(diag)
+ax.figure.savefig("mean_excess.png", dpi=300, bbox_inches="tight")
+ax = plot_gpd_qq(gof)
+ax.figure.savefig("gpd_qq.png", dpi=300, bbox_inches="tight")</code></pre>
+<p>The plotting functions intentionally return Matplotlib axes so journal-specific fonts, dimensions and annotation can be applied by the researcher without hidden styling.</p>
+<h2 id="automated-diagnostic-report">Automated diagnostic report</h2>
+<p><code>pot_diagnostic_report</code> creates a self-contained HTML report from the numerical diagnostics:</p>
+<pre class="highlight"><code class="language-python">html = pot_diagnostic_report(diag, gof=gof, uncertainty=threshold_ci)
+with open("pot_report.html", "w", encoding="utf-8") as f:
+    f.write(html)</code></pre>
+<p>The report records threshold diagnostics and a publication checklist. It does not replace scientific interpretation or peer-review-quality figure checking.</p>
+<h2 id="publication-checklist">Publication checklist</h2>
+<p>Report: data source/version; temporal resolution and units; threshold candidates and selection rule; event definition; declustering rule; number/rate of retained exceedances; GPD parameter convention; return-period unit; uncertainty method and bootstrap size; random seed; GOF diagnostics; threshold sensitivity; stationarity assumption; covariates and model comparison where relevant.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

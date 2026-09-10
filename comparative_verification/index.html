@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://sanjeevsingh-original.github.io/climatevar/comparative_verification/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Comparative precipitation verification - climatevar</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">climatevar</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting Started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../datasets/" class="dropdown-item">Common data model</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">Dataset interoperability</a>
+</li>
+                                    
+<li>
+    <a href="../api/" class="dropdown-item">API cookbook</a>
+</li>
+                                    
+<li>
+    <a href="../trends/" class="dropdown-item">Trend analysis</a>
+</li>
+                                    
+<li>
+    <a href="../verification/" class="dropdown-item">Precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Comparative precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../error_tagging/" class="dropdown-item">Rainfall error tagging</a>
+</li>
+                                    
+<li>
+    <a href="../ml_error_tagging/" class="dropdown-item">ML/DL error classification</a>
+</li>
+                                    
+<li>
+    <a href="../extremes/" class="dropdown-item">Extreme-value analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Project</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../roadmap/" class="dropdown-item">Scientific roadmap</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../verification/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../error_tagging/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/sanjeevsingh-original/climatevar/edit/master/docs/comparative_verification.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#comparative-precipitation-verification" class="nav-link">Comparative precipitation verification</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#odisha-ready-experiment" class="nav-link">Odisha-ready experiment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#outputs" class="nav-link">Outputs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#publication-grade-spatial-figures" class="nav-link">Publication-grade spatial figures</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#spatial-maps" class="nav-link">Spatial maps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#dataset-adapters" class="nav-link">Dataset adapters</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#regridding" class="nav-link">Regridding</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#intensity-conditioning" class="nav-link">Intensity conditioning</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#error-tagging-and-ml" class="nav-link">Error tagging and ML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#scientific-reporting" class="nav-link">Scientific reporting</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="comparative-precipitation-verification">Comparative precipitation verification</h1>
+<p><code>climatevar.verification</code> provides a reproducible workflow for comparing ERA5, GPM-IMERG, IMDAA, WRF and CMIP6 against an explicitly selected reference.</p>
+<h2 id="odisha-ready-experiment">Odisha-ready experiment</h2>
+<p>For the standard Odisha analysis, use <code>odisha_experiment()</code>. It defaults to the common 2000–2018 period, matching the historical availability of the IMDAA archive described by IMD. IMD's 0.25° daily gridded rainfall is available as a NetCDF product in millimetres and is an appropriate declared reference candidate for an India-focused evaluation. citeturn0search0turn0search3</p>
+<pre class="highlight"><code class="language-python">from climatevar.verification import odisha_experiment, run_experiment, save_experiment
+
+config = odisha_experiment(
+    imd="data/IMD_rainfall.nc",
+    era5="data/ERA5.nc",
+    imerg="data/IMERG.nc",
+    imdaa="data/IMDAA.nc",
+    wrf="data/wrfout_d01.nc",
+    cmip6="data/CMIP6_pr.nc",
+    regrid_method="conservative",
+    uncertainty_resamples=1000,
+    block_length=7,
+    random_state=0,
+)
+
+result = run_experiment(config)
+save_experiment(result, "results/odisha_2000_2018")</code></pre>
+<p>The experiment uses an explicit Odisha bounding envelope before verification. For publication figures, replace this envelope with an authoritative Odisha administrative polygon or watershed mask if exact area boundaries are required.</p>
+<h2 id="outputs">Outputs</h2>
+<p>The runner writes:</p>
+<ul>
+<li><code>overall.csv</code> — domain-average deterministic and event scores;</li>
+<li><code>seasonal.csv</code> — MAM, JJAS and ON scores;</li>
+<li><code>intensity.csv</code> — dry/light/moderate/heavy/very-heavy/extreme conditional scores;</li>
+<li><code>ranking.csv</code> — transparent composite summary using absolute bias rather than signed bias;</li>
+<li><code>uncertainty.csv</code> — 95% moving-block-bootstrap intervals for key metrics;</li>
+<li><code>spatial.nc</code> — grid-cell bias, MAE, RMSE, correlation, POD, FAR, frequency bias and valid counts;</li>
+<li><code>error_features.nc</code> — diagnostic ML/error-tagging fields.</li>
+</ul>
+<p>The uncertainty analysis uses a reproducible circular moving-block bootstrap over time. It accounts for short-range temporal dependence better than independently resampling individual daily observations. The resulting interval is an uncertainty estimate for the evaluation statistic, not a statement that the reference itself is error-free.</p>
+<h2 id="publication-grade-spatial-figures">Publication-grade spatial figures</h2>
+<p>The <code>climatevar.verification.cartography</code> module provides a Cartopy-based publication map with optional administrative boundaries, DEM contours, significance stippling, shared metric limits and geographic grid labels. Cartopy and GeoPandas remain optional so the core package does not acquire heavy GIS dependencies.</p>
+<pre class="highlight"><code class="language-python">from climatevar.verification import publication_map, export_publication_figure
+
+fig, _ = publication_map(
+    result.spatial["bias"].sel(dataset="ERA5"),
+    boundary="data/odisha_boundary.shp",
+    topography="data/odisha_dem.nc",
+    title="ERA5 precipitation bias over Odisha",
+    panel_label="(a)",
+)
+files = export_publication_figure(fig, "results/odisha_2000_2018/figures/era5_bias")</code></pre>
+<p>For political/administrative boundaries in India, use Survey of India digital boundary data rather than an arbitrary web shapefile. Survey of India identifies its digital boundary data as the standard for political maps and provides administrative boundary datasets at state/district/sub-district levels. citeturn0search9turn0search24</p>
+<p>The plotting function intentionally does <strong>not</strong> calculate significance. Supply a boolean significance mask or p-value field generated by the declared statistical test. This avoids hiding statistical assumptions inside the visualization layer.</p>
+<p>Recommended manuscript figure settings are:</p>
+<ul>
+<li>precipitation bias/error: symmetric limits centred on zero;</li>
+<li>POD/FAR: fixed 0–1 limits;</li>
+<li>same metric limits across all products in a panel;</li>
+<li>district/state boundary overlay from an authoritative source;</li>
+<li>optional subdued DEM contours rather than a strong terrain background;</li>
+<li>significance stippling only from an explicitly documented test;</li>
+<li>600-dpi PNG/TIFF for raster submission and vector PDF for line/text quality.</li>
+</ul>
+<p>Survey of India also provides topographic data containing administrative boundaries, hydrology and hypsography, making its data portal an appropriate authoritative source for map context. citeturn0search0</p>
+<h2 id="spatial-maps">Spatial maps</h2>
+<p>The optional <code>climatevar.verification.plots</code> module provides <code>plot_spatial_metric()</code> and <code>plot_scorecard()</code>. The spatial NetCDF output is deliberately kept independent of plotting, so the same fields can be rendered with Matplotlib, Cartopy or GIS software.</p>
+<h2 id="dataset-adapters">Dataset adapters</h2>
+<p><code>ProductSpec</code>/<code>load_precipitation()</code> provides presets for <code>era5</code>, <code>era5-land</code>, <code>imerg</code>, <code>gpm</code>, <code>imdaa</code>, <code>imd</code>, <code>cmip6</code> and <code>wrf</code>. Variable names can always be overridden because provider files differ between versions.</p>
+<p>WRF precipitation is calculated from <code>RAINC + RAINNC</code> with restart-aware differencing. A WRF curvilinear grid should be regridded with xESMF before grid-cell verification.</p>
+<h2 id="regridding">Regridding</h2>
+<p><code>linear</code> and <code>nearest</code> are transparent interpolation baselines. <code>conservative</code>, <code>bilinear</code> and <code>patch</code> use optional xESMF. For precipitation totals, conservative remapping should be preferred when valid source/target cell geometry is available.</p>
+<h2 id="intensity-conditioning">Intensity conditioning</h2>
+<p>The default analysis classes are:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th style="text-align: right;">Rainfall amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dry</td>
+<td style="text-align: right;">0–&lt;1 mm</td>
+</tr>
+<tr>
+<td>light</td>
+<td style="text-align: right;">1–&lt;10 mm</td>
+</tr>
+<tr>
+<td>moderate</td>
+<td style="text-align: right;">10–&lt;20 mm</td>
+</tr>
+<tr>
+<td>heavy</td>
+<td style="text-align: right;">20–&lt;50 mm</td>
+</tr>
+<tr>
+<td>very heavy</td>
+<td style="text-align: right;">50–&lt;100 mm</td>
+</tr>
+<tr>
+<td>extreme</td>
+<td style="text-align: right;">≥100 mm</td>
+</tr>
+</tbody>
+</table>
+<p>These are configurable analysis defaults, not universal scientific thresholds. Percentile-based extreme definitions can be supplied separately for a publication analysis.</p>
+<h2 id="error-tagging-and-ml">Error tagging and ML</h2>
+<p>The error-feature dataset is a diagnostic target dataset: observations define the product error. For prospective ML prediction, observation-derived quantities such as observed rainfall, signed error and error class must not be used as predictors. Only information available at prediction time should enter the predictor matrix.</p>
+<h2 id="scientific-reporting">Scientific reporting</h2>
+<p>Do not report the composite ranking as a universal winner. Product skill can vary by region, topography, season and rainfall intensity. The IMD data portal describes the 0.25° product as a daily gauge-based gridded rainfall dataset over India, while IMDAA is a 12-km regional reanalysis covering 1979–2018. citeturn0search0turn0search3</p>
+<p>For a manuscript, retain the full component scorecard, report the common period and reference explicitly, document the regridding method, provide missing-data handling, and report uncertainty alongside the point estimates.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

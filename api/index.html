@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://sanjeevsingh-original.github.io/climatevar/api/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>API cookbook - climatevar</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">climatevar</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting Started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../datasets/" class="dropdown-item">Common data model</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">Dataset interoperability</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">API cookbook</a>
+</li>
+                                    
+<li>
+    <a href="../trends/" class="dropdown-item">Trend analysis</a>
+</li>
+                                    
+<li>
+    <a href="../verification/" class="dropdown-item">Precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../comparative_verification/" class="dropdown-item">Comparative precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../error_tagging/" class="dropdown-item">Rainfall error tagging</a>
+</li>
+                                    
+<li>
+    <a href="../ml_error_tagging/" class="dropdown-item">ML/DL error classification</a>
+</li>
+                                    
+<li>
+    <a href="../extremes/" class="dropdown-item">Extreme-value analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Project</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../roadmap/" class="dropdown-item">Scientific roadmap</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../interoperability/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../trends/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/sanjeevsingh-original/climatevar/edit/master/docs/api.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#api-cookbook" class="nav-link">API cookbook</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#imports" class="nav-link">Imports</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#peaks-over-threshold-extremes" class="nav-link">Peaks-over-threshold extremes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#formal-drought-indices" class="nav-link">Formal drought indices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#climatology-and-anomalies" class="nav-link">Climatology and anomalies</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#quality-control" class="nav-link">Quality control</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#time-and-calendars" class="nav-link">Time and calendars</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#seasonal-analysis" class="nav-link">Seasonal analysis</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#seasonal-trend-series" class="nav-link">Seasonal trend series</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#precipitation-normalization" class="nav-link">Precipitation normalization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#precipitation-extremes" class="nav-link">Precipitation extremes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#wrf-precipitation" class="nav-link">WRF precipitation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#thermodynamics-and-moisture" class="nav-link">Thermodynamics and moisture</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#trends" class="nav-link">Trends</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#gev" class="nav-link">GEV</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#spatial-analysis" class="nav-link">Spatial analysis</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#grid-utilities" class="nav-link">Grid utilities</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#verification-metrics" class="nav-link">Verification metrics</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#dataset-interoperability" class="nav-link">Dataset interoperability</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#schema-and-station-data" class="nav-link">Schema and station data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#complete-monsoon-trend-workflow" class="nav-link">Complete monsoon + trend workflow</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#research-reproducibility-checklist" class="nav-link">Research reproducibility checklist</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="api-cookbook">API cookbook</h1>
+<p>Practical examples for the public <code>climatevar</code> functions. All examples use xarray objects and can be adapted to ERA5, ERA5-Land, IMERG/GPM, IMDAA, CMIP6, WRF and station observations.</p>
+<h2 id="imports">Imports</h2>
+<pre class="highlight"><code class="language-python">import numpy as np
+import pandas as pd
+import xarray as xr</code></pre>
+<h2 id="peaks-over-threshold-extremes">Peaks-over-threshold extremes</h2>
+<p>POT analysis models excesses above a sufficiently high threshold with a generalized Pareto distribution (GPD). Threshold choice is a model assumption, not a cosmetic setting: inspect parameter stability and exceedance counts across several candidate thresholds. For daily rainfall, dependent exceedances should generally be declustered before fitting an independent-exceedance model. These diagnostics are especially important for Indian monsoon rainfall, where multi-day storm systems can generate clusters of exceedances. Recent Indian precipitation research also demonstrates substantial sensitivity of return-level estimates to threshold choice. citeturn0search0turn0search4</p>
+<pre class="highlight"><code class="language-python">from climatevar.extremes import (
+    pot_exceedances,
+    gpd_fit,
+    decluster_exceedances,
+    threshold_diagnostics,
+    pot_return_level,
+    pot_return_level_ci,
+)
+
+rain = xr.open_dataarray("daily_rainfall.nc")
+threshold = 100.0  # mm/day; determine scientifically for your study region
+
+excess = pot_exceedances(rain, threshold)
+fit = gpd_fit(excess)
+
+# Check several candidate thresholds before selecting one.
+diag = threshold_diagnostics(rain, [80, 90, 100, 110, 120, 130])
+
+# For dependent daily extremes, retain cluster maxima.
+peaks = decluster_exceedances(rain, threshold, run_length=3)
+peak_excess = peaks - threshold
+
+# Example: rate per day and return period in days.
+rate = float(fit["n_exceedances"] / rain.count())
+rl100 = pot_return_level(
+    threshold,
+    float(fit["shape"]),
+    float(fit["scale"]),
+    rate,
+    return_period=100 * 365.25,
+)
+
+ci = pot_return_level_ci(
+    rain,
+    threshold,
+    return_period=100 * 365.25,
+    decluster_run_length=3,
+    n_resamples=2000,
+    random_state=42,
+)</code></pre>
+<p>The GPD uses the standard excess formulation with shape <code>xi</code> and scale <code>sigma</code>; negative shape implies a finite upper endpoint. POT return levels combine the fitted GPD tail with the exceedance rate, so the return-period unit must match the rate unit. citeturn0search0turn0search1</p>
+<p><code>threshold_diagnostics</code> provides exceedance counts/rates and GPD shape/scale estimates over a candidate threshold sequence. A stable region of the shape parameter, adequate exceedance count, and sensible mean-excess behavior are useful evidence when selecting a threshold; no single automatic threshold should be accepted without diagnostics. citeturn0search2turn0search9</p>
+<p><code>decluster_exceedances</code> uses a runs rule and retains the maximum from each cluster. The run length is application-specific and should be justified from the temporal dependence of the variable rather than treated as universal. POT methodology requires attention to independence because clustered extremes violate the simple independent-exceedance assumption. citeturn0search0</p>
+<p><code>pot_return_level_ci</code> uses a reproducible parametric-bootstrap procedure for the GPD excesses. Bootstrap uncertainty does <strong>not</strong> include threshold-selection uncertainty; for publication, sensitivity across a defensible threshold range should be reported separately. This is particularly important for non-stationary rainfall applications, where threshold choice can materially affect return-level estimates. citeturn0search4</p>
+<hr />
+<h2 id="formal-drought-indices">Formal drought indices</h2>
+<h3 id="spi"><code>spi</code></h3>
+<p><code>spi</code> calculates the formal Standardized Precipitation Index from accumulated precipitation. The default Gamma distribution explicitly accounts for zero precipitation; Pearson Type III is also supported. The fitted distribution is estimated separately for each calendar month.</p>
+<pre class="highlight"><code class="language-python">from climatevar.drought import spi
+monthly_rain = xr.open_dataarray("monthly_precipitation.nc")
+spi3 = spi(monthly_rain, scale=3, calibration_start="1991-01-01", calibration_end="2020-12-31")</code></pre>
+<h3 id="spei"><code>spei</code></h3>
+<p>SPEI uses climatic water balance <code>P - PET</code> and a three-parameter log-logistic distribution.</p>
+<pre class="highlight"><code class="language-python">from climatevar.drought import spei
+spei3 = spei(monthly_rain, monthly_pet, scale=3, calibration_start="1991-01-01", calibration_end="2020-12-31")</code></pre>
+<h3 id="drought_category-fit_quality-spi_like"><code>drought_category</code>, <code>fit_quality</code>, <code>spi_like</code></h3>
+<pre class="highlight"><code class="language-python">from climatevar.drought import drought_category, fit_quality, spi_like
+category = drought_category(spi3)
+quality = fit_quality(spi3)
+legacy = spi_like(monthly_rain, scale=3)  # not formal SPI</code></pre>
+<hr />
+<h2 id="climatology-and-anomalies">Climatology and anomalies</h2>
+<pre class="highlight"><code class="language-python">from climatevar.climatology import climatology, anomaly
+monthly = climatology(rain, group="month")
+anom = anomaly(rain, monthly, group="month")</code></pre>
+<hr />
+<h2 id="quality-control">Quality control</h2>
+<pre class="highlight"><code class="language-python">from climatevar.quality import valid_fraction, require_completeness, annual_valid_fraction
+from climatevar.time import year_complete_mask
+fraction = valid_fraction(rain, dim="time")
+annual = annual_valid_fraction(rain, dim="time")
+rain_qc = require_completeness(rain, min_fraction=0.9)
+complete = year_complete_mask(rain, min_valid_fraction=0.9)</code></pre>
+<hr />
+<h2 id="time-and-calendars">Time and calendars</h2>
+<pre class="highlight"><code class="language-python">from climatevar.time import calendar_name, time_step_seconds, infer_frequency
+from climatevar.time import expected_days_in_year, expected_days, year_complete_mask
+from climatevar.time import season_year, drop_leap_day, validate_time
+
+print(calendar_name(rain))
+print(infer_frequency(rain))
+print(expected_days_in_year(2024))
+expected = expected_days(rain)
+complete = year_complete_mask(rain)
+djf_year = season_year(rain, season="DJF")
+rain_365 = drop_leap_day(rain)
+validate_time(rain)</code></pre>
+<p>CF time bounds are preferred when available.</p>
+<hr />
+<h2 id="seasonal-analysis">Seasonal analysis</h2>
+<pre class="highlight"><code class="language-python">from climatevar.seasonal import seasonal_mean, monsoon_total
+jja = seasonal_mean(rain, "JJA")
+ism = monsoon_total(rain, start_month=6, end_month=9)</code></pre>
+<hr />
+<h2 id="seasonal-trend-series">Seasonal trend series</h2>
+<p><code>seasonal_series</code> creates one value per climatological season and is calendar-aware. It supports monthly, daily, and regular sub-daily data. For precipitation totals use <code>aggregation="sum"</code>; for state variables such as temperature use <code>aggregation="mean"</code>. <code>aggregation="auto"</code> can infer the choice from precipitation-like metadata, but explicit aggregation is recommended for publication analyses.</p>
+<pre class="highlight"><code class="language-python">from climatevar.trends import seasonal_series, seasonal_mann_kendall, seasonal_sen_slope
+
+jja_rain = seasonal_series(daily_rain, "JJA", aggregation="sum", min_valid_fraction=0.9)
+jja_mk = seasonal_mann_kendall(daily_rain, "JJA", aggregation="sum", min_valid_fraction=0.9)
+jja_slope = seasonal_sen_slope(daily_rain, "JJA", aggregation="sum", min_valid_fraction=0.9)
+
+jja_temperature = seasonal_series(daily_temperature, "JJA", aggregation="mean", min_valid_fraction=0.9)</code></pre>
+<p>Completeness is evaluated against the expected sample count for the detected regular frequency and calendar. Incomplete seasons are masked rather than silently included. Irregular time axes should be pre-aggregated before seasonal trend analysis. For DJF, December is assigned to the following January/February season-year.</p>
+<hr />
+<h2 id="precipitation-normalization">Precipitation normalization</h2>
+<pre class="highlight"><code class="language-python">from climatevar.precipitation import interval_amount_mm, normalize_precipitation, daily_amount
+amount = interval_amount_mm(precip)
+hourly = normalize_precipitation(hourly_rain)       # mm/hr
+three_hour = normalize_precipitation(rain_3hour)   # mm/3hr
+daily_rate = normalize_precipitation(daily_rain)   # mm/day
+daily = daily_amount(hourly_rain)</code></pre>
+<hr />
+<h2 id="precipitation-extremes">Precipitation extremes</h2>
+<pre class="highlight"><code class="language-python">from climatevar.precipitation import Rx1day, Rx5day, PRCPTOT, R10mm, R20mm, R95p, R99p, CDD, CWD
+rx1 = Rx1day(daily)
+rx5 = Rx5day(daily)
+prcptot = PRCPTOT(daily)
+r10 = R10mm(daily)
+r20 = R20mm(daily)
+cdd = CDD(daily)
+cwd = CWD(daily)
+r95 = R95p(daily, baseline_start="1991-01-01", baseline_end="2020-12-31")
+r99 = R99p(daily, baseline_start="1991-01-01", baseline_end="2020-12-31")</code></pre>
+<hr />
+<h2 id="wrf-precipitation">WRF precipitation</h2>
+<pre class="highlight"><code class="language-python">from climatevar.precipitation import wrf_total_precipitation, wrf_precipitation_amount
+wrf = xr.open_dataset("wrfout_d01_2024-07-01_00:00:00")
+total = wrf_total_precipitation(wrf)
+interval = wrf_precipitation_amount(wrf)</code></pre>
+<hr />
+<h2 id="thermodynamics-and-moisture">Thermodynamics and moisture</h2>
+<pre class="highlight"><code class="language-python">from climatevar.thermodynamics import potential_temperature, equivalent_potential_temperature
+from climatevar.thermodynamics import saturation_vapor_pressure, specific_humidity_from_rh
+es = saturation_vapor_pressure(T)
+q = specific_humidity_from_rh(T, p, rh)
+theta = potential_temperature(T, p)
+theta_e = equivalent_potential_temperature(T, p, q)</code></pre>
+<hr />
+<h2 id="trends">Trends</h2>
+<h3 id="classical-and-autocorrelation-aware-trends">Classical and autocorrelation-aware trends</h3>
+<pre class="highlight"><code class="language-python">from climatevar.trends import mann_kendall, modified_mann_kendall, sens_slope, trend_free_prewhitening
+
+mk = mann_kendall(annual_rain)
+mmk = modified_mann_kendall(annual_rain)
+slope = sens_slope(annual_rain)
+tfpw_series = trend_free_prewhitening(annual_rain)</code></pre>
+<p>Classical MK assumes serial independence. The modified test uses a Yue-Wang-style effective-sample-size variance correction after Sen-slope detrending. It should be reported explicitly rather than being labelled as Hamed-Rao unless a full Hamed-Rao formulation is implemented.</p>
+<h3 id="seasonal-mk-and-sen-slope">Seasonal MK and Sen slope</h3>
+<pre class="highlight"><code class="language-python">from climatevar.trends import seasonal_series, seasonal_mann_kendall, seasonal_sen_slope
+
+jja = seasonal_series(monthly_rain, "JJA", aggregation="sum")
+jja_mk = seasonal_mann_kendall(monthly_rain, "JJA", aggregation="sum")
+jja_slope = seasonal_sen_slope(monthly_rain, "JJA", aggregation="sum")</code></pre>
+<p>For temperature or other state variables, use <code>aggregation="mean"</code>.</p>
+<h3 id="spatial-trend-fields-and-fdr">Spatial trend fields and FDR</h3>
+<pre class="highlight"><code class="language-python">from climatevar.trends import spatial_trend
+
+trend = spatial_trend(annual_rain, dim="time", alpha=0.05)
+trend["sen_slope"]
+trend["pvalue"]
+trend["significant"]
+trend["significant_fdr"]</code></pre>
+<p><code>spatial_trend</code> returns grid-cell trend statistics, autocorrelation-aware p-values, Sen slopes, uncorrected significance and Benjamini-Hochberg FDR significance. FDR controls the expected false-discovery proportion among rejected local tests; it does not establish that the field as a whole contains a significant trend.</p>
+<h3 id="regional-trend">Regional trend</h3>
+<pre class="highlight"><code class="language-python">from climatevar.trends import regional_mean, regional_trend
+
+region_series = regional_mean(annual_rain, lat_dim="latitude", lon_dim="longitude")
+region = regional_trend(annual_rain, lat_dim="latitude", lon_dim="longitude", alpha=0.05)</code></pre>
+<p>Cosine-latitude weighting is used by default for regular geographic grids. For exact cell areas or curvilinear grids, supply a two-dimensional <code>weights</code> DataArray. Regional trends should be reported separately from grid-cell significance because they answer a different scientific question.</p>
+<h3 id="field-significance-beyond-fdr">Field significance beyond FDR</h3>
+<pre class="highlight"><code class="language-python">from climatevar.trends import field_significance
+
+field = field_significance(
+    annual_rain,
+    dim="time",
+    alpha=0.05,
+    block_length=5,
+    n_resamples=1000,
+    random_state=42,
+)
+
+field["observed_count"]
+field["n_cells"]
+field["critical_count"]
+field["field_pvalue"]
+field["significant_fdr"]</code></pre>
+<p><code>field_significance</code> is a field-wide Monte-Carlo diagnostic. It uses moving-block resampling of detrended residual fields and applies a common time-index sequence to all complete grid cells, preserving their spatial covariance while retaining short-range temporal dependence. The observed number of locally significant cells is compared with its null distribution.</p>
+<p>Interpretation:</p>
+<ul>
+<li><code>significant</code> is the local uncorrected modified-MK mask.</li>
+<li><code>significant_fdr</code> is the Benjamini-Hochberg FDR mask.</li>
+<li><code>observed_count</code> is the number of significant complete cells at the chosen <code>alpha</code>.</li>
+<li><code>n_cells</code> is the number of complete cells included in the field-wide test.</li>
+<li><code>critical_count</code> is the upper-tail bootstrap threshold for the count.</li>
+<li><code>field_pvalue</code> is the Monte-Carlo probability of obtaining at least the observed count under the block-resampled, detrended null.</li>
+<li><code>null_counts</code> contains the bootstrap distribution for reproducibility.</li>
+</ul>
+<p>The field-wide test is complementary to FDR, not a replacement for it. The bootstrap count uses classical MK on null residuals, while observed local p-values use the modified MK implementation. For publication, report block length, number of resamples, random seed, completeness rule, local-test method and spatial weighting.</p>
+<h3 id="fdr-directly">FDR directly</h3>
+<pre class="highlight"><code class="language-python">from climatevar.trends import fdr_mask
+significant = fdr_mask(trend["pvalue"], alpha=0.05)</code></pre>
+<hr />
+<h2 id="gev">GEV</h2>
+<pre class="highlight"><code class="language-python">from climatevar.extremes import gev_fit, gev_return_level, gev_return_level_ci
+fit = gev_fit(annual_maxima)
+rl50 = gev_return_level(fit["shape"], fit["loc"], fit["scale"], 50)
+rl50_ci = gev_return_level_ci(annual_maxima, 50, n_resamples=2000, random_state=42)</code></pre>
+<p>The GEV bootstrap interval is parametric: it treats the fitted GEV as the data-generating model and refits each bootstrap sample. Report the bootstrap size and random seed.</p>
+<hr />
+<h2 id="spatial-analysis">Spatial analysis</h2>
+<pre class="highlight"><code class="language-python">from climatevar.spatial import cosine_latitude_weights, area_weighted_mean
+weights = cosine_latitude_weights(rain["latitude"])
+regional = area_weighted_mean(rain, lat_dim="latitude", spatial_dims=("latitude", "longitude"))</code></pre>
+<hr />
+<h2 id="grid-utilities">Grid utilities</h2>
+<pre class="highlight"><code class="language-python">from climatevar.grid import normalize_longitude, regrid
+ds180 = normalize_longitude(ds, center=0.0)
+out = regrid(ds["precipitation"], target, method="linear")</code></pre>
+<hr />
+<h2 id="verification-metrics">Verification metrics</h2>
+<pre class="highlight"><code class="language-python">from climatevar.metrics import bias, mae, rmse, correlation, nse
+bias_map = bias(obs, model, dim="time")
+mae_map = mae(obs, model, dim="time")
+rmse_map = rmse(obs, model, dim="time")
+corr_map = correlation(obs, model, dim="time")
+nse_map = nse(obs, model, dim="time")</code></pre>
+<hr />
+<h2 id="dataset-interoperability">Dataset interoperability</h2>
+<pre class="highlight"><code class="language-python">from climatevar.io.normalize import normalize_coords, standardize_variables, normalize_dataset, find_variable
+coords = normalize_coords(raw, dataset="era5")
+standard = standardize_variables(raw, variables={"precipitation": "tp", "temperature": "t2m"})
+era5 = normalize_dataset(raw, dataset="era5")
+cmip6 = normalize_dataset(raw_cmip6, dataset="cmip6")
+name = find_variable(raw, "precipitation")</code></pre>
+<hr />
+<h2 id="schema-and-station-data">Schema and station data</h2>
+<pre class="highlight"><code class="language-python">from climatevar.io.schema import validate_dataset, describe_dataset
+validate_dataset(ds, required=("precipitation", "latitude", "longitude", "time"))
+print(describe_dataset(ds))</code></pre>
+<pre class="highlight"><code class="language-python">from climatevar.io.stations import normalize_station_dataframe, station_dataframe_to_xarray
+df = normalize_station_dataframe(pd.read_csv("station_rainfall.csv"))
+station_ds = station_dataframe_to_xarray(df)</code></pre>
+<hr />
+<h2 id="complete-monsoon-trend-workflow">Complete monsoon + trend workflow</h2>
+<pre class="highlight"><code class="language-python">import xarray as xr
+from climatevar.io.normalize import normalize_dataset
+from climatevar.precipitation import daily_amount, PRCPTOT, Rx1day
+from climatevar.seasonal import monsoon_total
+from climatevar.trends import modified_mann_kendall, sens_slope, spatial_trend
+
+raw = xr.open_dataset("era5.nc")
+ds = normalize_dataset(raw, dataset="era5")
+daily = daily_amount(ds["precipitation"])
+
+rx1 = Rx1day(daily)
+prcptot = PRCPTOT(daily)
+ism = monsoon_total(daily)
+
+ism_mk = modified_mann_kendall(ism)
+ism_slope = sens_slope(ism)
+field = spatial_trend(ism)</code></pre>
+<h2 id="research-reproducibility-checklist">Research reproducibility checklist</h2>
+<p>For publication-quality work, report dataset/version, domain, temporal aggregation, units, calendar, completeness rule, SPI/SPEI distribution and calibration period, PET method for SPEI, percentile baseline, event thresholds, POT threshold-selection diagnostics, declustering rule, GPD parameterization, exceedance-rate units, return-period units, bootstrap method/size/seed, spatial weighting, trend method, autocorrelation treatment, significance level, multiple-testing correction, and field-significance resampling design when used.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

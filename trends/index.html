@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://sanjeevsingh-original.github.io/climatevar/trends/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Trend analysis - climatevar</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">climatevar</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting Started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../datasets/" class="dropdown-item">Common data model</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">Dataset interoperability</a>
+</li>
+                                    
+<li>
+    <a href="../api/" class="dropdown-item">API cookbook</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Trend analysis</a>
+</li>
+                                    
+<li>
+    <a href="../verification/" class="dropdown-item">Precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../comparative_verification/" class="dropdown-item">Comparative precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../error_tagging/" class="dropdown-item">Rainfall error tagging</a>
+</li>
+                                    
+<li>
+    <a href="../ml_error_tagging/" class="dropdown-item">ML/DL error classification</a>
+</li>
+                                    
+<li>
+    <a href="../extremes/" class="dropdown-item">Extreme-value analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Project</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../roadmap/" class="dropdown-item">Scientific roadmap</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../api/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../verification/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/sanjeevsingh-original/climatevar/edit/master/docs/trends.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#robust-trend-analysis" class="nav-link">Robust trend analysis</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#seasonal-aggregation-and-completeness" class="nav-link">Seasonal aggregation and completeness</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#classical-mk" class="nav-link">Classical MK</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#modified-mann-kendall" class="nav-link">Modified Mann-Kendall</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#trend-free-pre-whitening" class="nav-link">Trend-free pre-whitening</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sen-slope-confidence-intervals" class="nav-link">Sen slope confidence intervals</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#spatial-trend-fields-and-fdr" class="nav-link">Spatial trend fields and FDR</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#regional-trend" class="nav-link">Regional trend</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#field-significance-beyond-fdr" class="nav-link">Field significance beyond FDR</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#recommended-publication-workflow" class="nav-link">Recommended publication workflow</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="robust-trend-analysis">Robust trend analysis</h1>
+<p><code>climatevar</code> provides classical Mann-Kendall (MK), Sen's slope, an autocorrelation-aware modified MK, trend-free pre-whitening (TFPW), calendar-aware seasonal trends, spatial FDR, regional trends, moving-block confidence intervals for Sen slopes, and a block-bootstrap field-significance diagnostic.</p>
+<h2 id="seasonal-aggregation-and-completeness">Seasonal aggregation and completeness</h2>
+<p><code>seasonal_series</code> now handles monthly, daily, and regular sub-daily data directly. It detects precipitation-like variables and sums them by default; state variables such as temperature are averaged. Use <code>aggregation</code> explicitly when the scientific definition is known.</p>
+<pre class="highlight"><code class="language-python">from climatevar.trends import seasonal_series, seasonal_mann_kendall, seasonal_sen_slope
+
+# Daily precipitation: calendar-aware JJA total
+jja_rain = seasonal_series(daily_rain, "JJA", aggregation="sum", min_valid_fraction=0.9)
+jja_mk = seasonal_mann_kendall(daily_rain, "JJA", aggregation="sum", min_valid_fraction=0.9)
+jja_slope = seasonal_sen_slope(daily_rain, "JJA", aggregation="sum", min_valid_fraction=0.9)
+
+# Daily temperature: JJA mean
+jja_temp = seasonal_series(daily_temperature, "JJA", aggregation="mean", min_valid_fraction=0.9)</code></pre>
+<p>Completeness is based on the expected number of samples for the detected frequency and calendar, including leap years, no-leap calendars, all-leap calendars, and 360-day calendars. Incomplete seasons are returned as missing rather than silently treated as complete. Irregular time axes should be pre-aggregated before seasonal trend analysis.</p>
+<p>For DJF, December is assigned to the following January/February season-year. This avoids ambiguous December/January labeling.</p>
+<h2 id="classical-mk">Classical MK</h2>
+<pre class="highlight"><code class="language-python">from climatevar.trends import mann_kendall, sens_slope
+mk = mann_kendall(annual_rain)
+slope = sens_slope(annual_rain)</code></pre>
+<p>Classical MK assumes serial independence. Positive autocorrelation can inflate apparent significance, so persistent climate and hydrological series should report the autocorrelation treatment used.</p>
+<h2 id="modified-mann-kendall">Modified Mann-Kendall</h2>
+<pre class="highlight"><code class="language-python">from climatevar.trends import modified_mann_kendall
+mmk = modified_mann_kendall(annual_rain)</code></pre>
+<p>The implementation uses a Yue-Wang-style effective-sample-size correction after removing the Sen-slope component before estimating persistence. It is intentionally described as an effective-sample-size correction rather than a Hamed-Rao implementation.</p>
+<h2 id="trend-free-pre-whitening">Trend-free pre-whitening</h2>
+<pre class="highlight"><code class="language-python">from climatevar.trends import trend_free_prewhitening, mann_kendall
+prewhitened = trend_free_prewhitening(annual_rain)
+mk_pw = mann_kendall(prewhitened)</code></pre>
+<p>TFPW removes the estimated monotonic component, estimates lag-1 persistence, removes the AR(1) component, and restores the trend component. Report the exact pre-whitening method because variants can produce different significance estimates.</p>
+<h2 id="sen-slope-confidence-intervals">Sen slope confidence intervals</h2>
+<pre class="highlight"><code class="language-python">from climatevar.trends import sens_slope_ci
+ci = sens_slope_ci(annual_rain, alpha=0.05, n_resamples=2000, block_length=5, random_state=42)</code></pre>
+<p><code>sens_slope_ci</code> reports the Sen slope together with percentile confidence limits from a moving-block bootstrap. Block resampling is preferred to an IID bootstrap when observations are serially dependent because it retains local dependence within blocks. The default block length is data-length dependent; for publication, explicitly report the selected block length and sensitivity-test it. The slope remains expressed per observation step, so convert it to physical units such as mm/year only when the observation interval is known and regular.</p>
+<p>For an area-weighted regional series:</p>
+<pre class="highlight"><code class="language-python">from climatevar.trends import regional_slope_ci
+regional_ci = regional_slope_ci(
+    annual_rain,
+    lat_dim="latitude",
+    lon_dim="longitude",
+    n_resamples=2000,
+    block_length=5,
+    random_state=42,
+)</code></pre>
+<p>The regional field is first reduced to one area-weighted time series and the bootstrap is then performed on that series. This avoids treating grid cells as independent bootstrap observations.</p>
+<p>Confidence intervals quantify uncertainty under the selected resampling model; they do not replace the separate autocorrelation-aware trend-significance test.</p>
+<h2 id="spatial-trend-fields-and-fdr">Spatial trend fields and FDR</h2>
+<pre class="highlight"><code class="language-python">from climatevar.trends import spatial_trend
+trend = spatial_trend(annual_rain, alpha=0.05)</code></pre>
+<p>The result includes local modified-MK p-values, Sen slopes, an uncorrected significance mask and a Benjamini-Hochberg FDR mask. FDR controls the expected false-discovery proportion among rejected local hypotheses; it does not by itself answer whether the field contains a significant trend.</p>
+<h2 id="regional-trend">Regional trend</h2>
+<pre class="highlight"><code class="language-python">from climatevar.trends import regional_mean, regional_trend
+series = regional_mean(annual_rain, lat_dim="latitude", lon_dim="longitude")
+summary = regional_trend(annual_rain, lat_dim="latitude", lon_dim="longitude")</code></pre>
+<p>Regular geographic grids use cosine-latitude weighting by default. Supply exact cell-area weights when available. Regional trend results answer a different question from grid-cell significance and should be reported separately.</p>
+<h2 id="field-significance-beyond-fdr">Field significance beyond FDR</h2>
+<pre class="highlight"><code class="language-python">from climatevar.trends import field_significance
+field = field_significance(annual_rain, block_length=5, n_resamples=1000, random_state=42)</code></pre>
+<p>This performs a moving-block bootstrap on detrended residual fields. A common set of resampled time indices is applied to every grid cell, preserving the spatial covariance structure of the sampled field while retaining short-range temporal dependence through the blocks. The observed number of locally significant cells is compared with the bootstrap null distribution.</p>
+<p><code>field_pvalue</code> answers a field-level question; <code>significant_fdr</code> remains available for local multiple-testing control. The bootstrap count uses classical MK on the null residual fields, while observed local p-values use modified MK. For publication, report block length, number of resamples, random seed, completeness rule, local trend method, and weighting scheme.</p>
+<h2 id="recommended-publication-workflow">Recommended publication workflow</h2>
+<ol>
+<li>Verify time ordering, calendar and seasonal completeness.</li>
+<li>Convert precipitation to physically appropriate amounts before aggregation.</li>
+<li>Construct the seasonal series with an explicit <code>aggregation</code> and completeness threshold.</li>
+<li>Report Sen slope and classical MK as a baseline.</li>
+<li>Diagnose serial dependence and use modified MK or TFPW when justified.</li>
+<li>Report a bootstrap confidence interval for the Sen slope, with the block-length rationale.</li>
+<li>For spatial fields, report local p-values together with FDR results.</li>
+<li>If making a field-wide claim, add a documented block-bootstrap field-significance test.</li>
+<li>For regional claims, report the area-weighted regional series, trend and confidence interval separately.</li>
+<li>Report slope magnitude, units, sample period and uncertainty/significance—not p-value alone.</li>
+</ol></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

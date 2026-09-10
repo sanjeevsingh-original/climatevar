@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://sanjeevsingh-original.github.io/climatevar/roadmap/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Scientific roadmap - climatevar</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">climatevar</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting Started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../datasets/" class="dropdown-item">Common data model</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">Dataset interoperability</a>
+</li>
+                                    
+<li>
+    <a href="../api/" class="dropdown-item">API cookbook</a>
+</li>
+                                    
+<li>
+    <a href="../trends/" class="dropdown-item">Trend analysis</a>
+</li>
+                                    
+<li>
+    <a href="../verification/" class="dropdown-item">Precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../comparative_verification/" class="dropdown-item">Comparative precipitation verification</a>
+</li>
+                                    
+<li>
+    <a href="../error_tagging/" class="dropdown-item">Rainfall error tagging</a>
+</li>
+                                    
+<li>
+    <a href="../ml_error_tagging/" class="dropdown-item">ML/DL error classification</a>
+</li>
+                                    
+<li>
+    <a href="../extremes/" class="dropdown-item">Extreme-value analysis</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Project</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Scientific roadmap</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../extremes/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/sanjeevsingh-original/climatevar/edit/master/docs/roadmap.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#climatevar-scientific-roadmap" class="nav-link">climatevar scientific roadmap</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#phase-1-core-research-foundations" class="nav-link">Phase 1 — Core research foundations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-2-robust-trend-and-drought-analysis" class="nav-link">Phase 2 — Robust trend and drought analysis</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-3-publication-grade-climate-indices" class="nav-link">Phase 3 — Publication-grade climate indices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-4-extremes-and-uncertainty" class="nav-link">Phase 4 — Extremes and uncertainty</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-5-dataset-interoperability" class="nav-link">Phase 5 — Dataset interoperability</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-6-model-evaluation-and-rainfall-error-tagging" class="nav-link">Phase 6 — Model evaluation and rainfall error tagging</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-7-research-scale-computation" class="nav-link">Phase 7 — Research-scale computation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-8-scientific-usability" class="nav-link">Phase 8 — Scientific usability</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#phase-9-stable-release" class="nav-link">Phase 9 — Stable release</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#scientific-quality-gate" class="nav-link">Scientific quality gate</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="climatevar-scientific-roadmap">climatevar scientific roadmap</h1>
+<p>This roadmap prioritizes scientific correctness, reproducibility and research usefulness before API expansion.</p>
+<h2 id="phase-1-core-research-foundations">Phase 1 — Core research foundations</h2>
+<ul>
+<li>[x] xarray-first data model and package structure</li>
+<li>[x] Climatology, anomalies and completeness diagnostics</li>
+<li>[x] Precipitation indices and explicit unit handling</li>
+<li>[x] GEV fitting and return levels</li>
+<li>[x] Thermodynamic diagnostics</li>
+<li>[x] Spatial weighting</li>
+<li>[x] Dataset normalization foundations</li>
+<li>[x] WRF utility foundation</li>
+<li>[x] Automated tests and documentation workflow</li>
+</ul>
+<h2 id="phase-2-robust-trend-and-drought-analysis">Phase 2 — Robust trend and drought analysis</h2>
+<ul>
+<li>[x] Classical Mann-Kendall and Sen slope</li>
+<li>[x] Autocorrelation-aware modified Mann-Kendall</li>
+<li>[x] Trend-free pre-whitening</li>
+<li>[x] Calendar-aware seasonal aggregation for monthly, daily and regular sub-daily data</li>
+<li>[x] Spatial trend fields and Benjamini-Hochberg FDR</li>
+<li>[x] Area-weighted regional trends</li>
+<li>[x] Moving-block bootstrap field significance</li>
+<li>[x] Formal SPI/SPEI foundation</li>
+<li>[x] Independent numerical reference checks for trend methods</li>
+<li>[x] Moving-block bootstrap confidence intervals for Sen slopes and regional trends</li>
+<li>[x] DFA-based persistence/long-memory diagnostic</li>
+</ul>
+<h2 id="phase-3-publication-grade-climate-indices">Phase 3 — Publication-grade climate indices</h2>
+<ul>
+<li>[x] Calendar-aware ETCCDI-style precipitation definitions for core rainfall indices</li>
+<li>[x] Wet-day threshold conventions and explicit annual completeness controls</li>
+<li>[x] Fixed percentile baseline support with 1961–1990 as the ETCCDI default</li>
+<li>[x] CF time bounds for precipitation accumulation where available</li>
+<li>[x] Sub-daily-to-daily regular-sampling and coverage safeguards</li>
+<li>[x] Independent regression fixtures for core ETCCDI precipitation definitions</li>
+<li>[x] Leap-year, no-leap and 360-day calendar validation</li>
+<li>[x] Missing-day sensitivity and explicit completeness-threshold tests</li>
+<li>[x] Cross-check against published RClimDex/ETCCDI definitions and threshold conventions</li>
+<li>[ ] Validate against external RClimDex/Climpact numerical output files</li>
+<li>[ ] Add uncertainty and sensitivity options for percentile thresholds</li>
+</ul>
+<h2 id="phase-4-extremes-and-uncertainty">Phase 4 — Extremes and uncertainty</h2>
+<ul>
+<li>[x] GPD/POT framework</li>
+<li>[x] Parametric bootstrap confidence intervals for GEV return levels</li>
+<li>[x] POT threshold diagnostics and sensitivity</li>
+<li>[x] Runs-based declustering</li>
+<li>[x] Bootstrap confidence intervals and bootstrap GOF calibration</li>
+<li>[x] Non-stationary GPD and model-comparison diagnostics</li>
+<li>[x] Publication-quality EVT plotting and diagnostic reports</li>
+<li>[ ] Formal Bayesian/model-averaged threshold-selection uncertainty</li>
+<li>[ ] Robust non-stationary model comparison across multiple covariates and dependence structures</li>
+<li>[ ] External independent EVT reference validation</li>
+</ul>
+<h2 id="phase-5-dataset-interoperability">Phase 5 — Dataset interoperability</h2>
+<ul>
+<li>[x] Robust ERA5 / ERA5-Land adapters</li>
+<li>[x] IMERG/GPM product adapters</li>
+<li>[x] IMD/IMDAA gridded-data adapters</li>
+<li>[x] CMIP6 precipitation variable and calendar-compatible loading foundation</li>
+<li>[x] WRF precipitation adapter using cumulative-component differencing and restart handling</li>
+<li>[x] Metadata validation and explicit variable override/provenance fields</li>
+<li>[ ] Station-level IMD ingestion and station-to-grid matchup utilities</li>
+<li>[ ] Full CF cell-bound/bounds validation for conservative regridding</li>
+</ul>
+<h2 id="phase-6-model-evaluation-and-rainfall-error-tagging">Phase 6 — Model evaluation and rainfall error tagging</h2>
+<ul>
+<li>[x] Bias, MAE, RMSE, correlation and NSE extensions</li>
+<li>[x] Event-based precipitation verification</li>
+<li>[x] Spatial and conditional error diagnostics</li>
+<li>[x] Error decomposition by intensity, season and synoptic-ready feature hooks</li>
+<li>[x] ML/DL-ready rainfall error-tagging datasets</li>
+<li>[x] Random Forest / histogram-gradient-boosting baselines and optional XGBoost</li>
+<li>[x] Class-imbalance-aware training, probability calibration and leakage-aware CV</li>
+<li>[x] Comparative ERA5/IMERG/IMDAA/WRF/CMIP6 scorecard and transparent ranking</li>
+<li>[x] Automated multi-product experiment runner with seasonal/intensity scorecards, spatial NetCDF fields and ML-ready error outputs</li>
+<li>[ ] Calibrated model-specific error-class thresholds and sensitivity analysis</li>
+<li>[ ] Deep CNN/ConvLSTM/Transformer rainfall-error classifier</li>
+</ul>
+<h3 id="phase-6-current-focus">Phase 6 current focus</h3>
+<p><code>climatevar.verification</code> now provides dataset-family adapters, explicit reference/product specifications, common-period alignment, optional linear/nearest or xESMF regridding, deterministic and categorical scorecards, seasonal and rainfall-intensity conditioning, India/Odisha regional subsetting, spatial metric fields, transparent weighted ranking and ML/error-tagging outputs. The remaining research step is independent numerical validation on real ERA5/IMERG/IMDAA/WRF/CMIP6 files and calibrated uncertainty/sensitivity analysis.</p>
+<h2 id="phase-7-research-scale-computation">Phase 7 — Research-scale computation</h2>
+<ul>
+<li>[ ] Dask-aware trend and bootstrap algorithms</li>
+<li>[ ] Chunk-aware spatial statistics</li>
+<li>[ ] Performance benchmarks for regional and continental grids</li>
+<li>[ ] Memory-safe large ensemble workflows</li>
+<li>[ ] Optional accelerated numerical backends where justified</li>
+</ul>
+<h2 id="phase-8-scientific-usability">Phase 8 — Scientific usability</h2>
+<ul>
+<li>[ ] Reproducible worked examples for Indian Summer Monsoon research</li>
+<li>[ ] Example workflows for Odisha precipitation extremes</li>
+<li>[ ] Notebook suite covering ERA5, IMERG, IMDAA, WRF and CMIP6</li>
+<li>[x] Validation fixtures and expected-value regression datasets for core precipitation indices</li>
+<li>[x] EVT diagnostic and research-method reporting helpers</li>
+</ul>
+<h2 id="phase-9-stable-release">Phase 9 — Stable release</h2>
+<ul>
+<li>[ ] API stability review</li>
+<li>[ ] Deprecation and compatibility policy</li>
+<li>[ ] Versioned documentation</li>
+<li>[ ] Comprehensive API reference</li>
+<li>[ ] PyPI release</li>
+<li>[ ] DOI and citation metadata</li>
+<li>[ ] Reproducible release benchmarks</li>
+</ul>
+<h2 id="scientific-quality-gate">Scientific quality gate</h2>
+<p>Before a major method is promoted to a stable API, <code>climatevar</code> should have: (1) an explicit mathematical/statistical definition; (2) documented assumptions and limitations; (3) synthetic-data tests; (4) independent reference comparison where available; (5) clear missing-data and calendar treatment; (6) reproducible stochastic procedures; (7) appropriate uncertainty/significance reporting; and (8) documentation showing how the method should be reported scientifically.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
